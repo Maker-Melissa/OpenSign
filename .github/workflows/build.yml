@@ -2,6 +2,11 @@ name: Build CI
 
 on: [pull_request, push]
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./
+
 jobs:
   test:
     runs-on: ubuntu-latest
