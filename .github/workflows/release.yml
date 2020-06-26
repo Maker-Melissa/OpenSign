@@ -33,7 +33,6 @@ jobs:
       run: |
         make build-python PYTHON=$(which python3)
         sudo make install-python PYTHON=$(which python3)
-      working-directory: rpi-rgb-led-matrix/bindings/python/
     - name: Build and publish
       if: contains(steps.need-pypi.outputs.setup-py, 'setup.py')
       env:
