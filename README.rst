@@ -18,7 +18,7 @@ A library to facilitate easy RGB Matrix Sign Animations.
 
 Dependencies
 =============
-This driver depends on:
+This library depends on:
 
 * `Henner Zeller RPi RGB LED Matrix <https://github.com/hzeller/rpi-rgb-led-matrix/>`_
 * `Python Bindings for RGB Matrix Library <https://github.com/hzeller/rpi-rgb-led-matrix/tree/master/bindings/python>`_
