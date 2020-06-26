@@ -268,7 +268,7 @@ class OpenSign:
     def set_background_image(self, file):
         """Sets the background to an image
 
-        :param file: The file location of the image to display.
+        :param string file: The file location of the image to display.
         """
         if os.path.exists(file):
             self._background = file
@@ -1033,7 +1033,7 @@ class OpenSignCanvas:
     @property
     def opacity(self):
         """Get or set the maximum opacity of the canvas where 0 is
-        no transparent and 1 is opaque."""
+        transparent and 1 is opaque."""
         return self._opacity
 
     @opacity.setter
