@@ -17,8 +17,10 @@ extensions = [
     "sphinx.ext.todo",
 ]
 
+autodoc_mock_imports = ["rgbmatrix"]
+
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3.4", None),
+    "python": ("https://docs.python.org/3.6", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -109,10 +111,10 @@ html_static_path = ["_static"]
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 #
-html_favicon = "_static/favicon.ico"
+html_favicon = ""
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "Adafruit_blinkaDisplayioLibrarydoc"
+htmlhelp_basename = "OpenSignLibrarydoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 

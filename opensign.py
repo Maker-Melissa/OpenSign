@@ -23,7 +23,7 @@
 `opensign`
 ================================================================================
 
-A Library to facilitate easy RGB Matrix Sign Animations.
+A library to facilitate easy RGB Matrix Sign Animations.
 
 * Author(s): Melissa LeBlanc-Williams
 
