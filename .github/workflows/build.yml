@@ -25,16 +25,16 @@ jobs:
       uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Checkout Henner Zeller RGB LED Matrix Library
-      uses: actions/checkout@v2
-      with:
-        repository: hzeller/rpi-rgb-led-matrix
-        path: rpi-rgb-led-matrix
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y gettext
         pip install -r requirements.txt
+    - name: Checkout Henner Zeller RGB LED Matrix Library
+      uses: actions/checkout@v2
+      with:
+        repository: hzeller/rpi-rgb-led-matrix
+        path: rpi-rgb-led-matrix
     - name: Compile RGB Matrix Library Python Bindings
       working-directory: ./rpi-rgb-led-matrix/bindings/python/
       run: |
