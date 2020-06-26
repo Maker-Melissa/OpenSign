@@ -1,0 +1,56 @@
+name: Build CI
+
+on: [pull_request, push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+    - name: Translate Repo Name For Build Tools filename_prefix
+      id: repo-name
+      run: |
+        echo ::set-output name=repo-name::opensign
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+    - name: Versions
+      run: |
+        python3 --version
+    - name: Checkout Current Repo
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: Checkout Henner Zeller RGB LED Matrix Library
+      uses: actions/checkout@v2
+      with:
+        repository: hzeller/rpi-rgb-led-matrix
+        path: rpi-rgb-led-matrix
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gettext
+        pip install -r requirements.txt
+    - name: Compile RGB Matrix Library Python Bindings
+      run: |
+        make build-python PYTHON=$(which python3)
+        sudo make install-python PYTHON=$(which python3)
+    - name: Pip install pylint, black, & Sphinx
+      run: |
+        pip install --force-reinstall pylint black==19.10b0 Sphinx sphinx-rtd-theme
+    - name: Library version
+      run: git describe --dirty --always --tags
+    - name: Check formatting
+      run: |
+        black --check --target-version=py35 .
+    - name: PyLint
+      run: |
+        pylint opensign.py
+        ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace $( find . -path "./examples/*.py" ))
+    - name: Build docs
+      working-directory: docs
+      run: sphinx-build -E -W -b html . _build/html
