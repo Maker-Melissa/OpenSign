@@ -308,8 +308,8 @@ class OpenSign:
         time. The final position is centered.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :param int x: (optional) The amount of x-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
@@ -328,8 +328,8 @@ class OpenSign:
         time. The final position is centered.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :param int y: (optional) The amount of y-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
@@ -348,8 +348,8 @@ class OpenSign:
         time. The final position is centered.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :param int y: (optional) The amount of y-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
@@ -368,8 +368,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -385,8 +385,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -402,8 +402,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -419,8 +419,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -465,8 +465,8 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to blink. (default=3)
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         delay = duration / count / 2
@@ -477,14 +477,14 @@ class OpenSign:
             self.show(canvas)
             self._wait(start_time, delay)
 
-    def flash(self, canvas, count=1, duration=1):
+    def flash(self, canvas, count=3, duration=1):
         """Fade the foreground in and out a centain number of
         times over a certain period of time.
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to flash. (default=3)
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         delay = duration / count / 2
@@ -499,8 +499,8 @@ class OpenSign:
         of a number may slow down the animation too much.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :param float steps: (optional) The number of steps to perform the animation. (default=50)
         :type canvas: OpenSignCanvas
         """
@@ -518,8 +518,8 @@ class OpenSign:
         of a number may slow down the animation too much.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :param float steps: (optional) The number of steps to perform the animation. (default=50)
         :type canvas: OpenSignCanvas
         """
@@ -539,8 +539,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
@@ -576,8 +576,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
@@ -613,8 +613,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -649,8 +649,8 @@ class OpenSign:
         over a certain period of time.
 
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -687,8 +687,8 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -717,8 +717,8 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -747,8 +747,8 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -777,8 +777,8 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over.
-        (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -829,9 +829,9 @@ class OpenSignCanvas:
         :param string name: The name of the font. This is used when setting the font.
         :param string file: The filename of the font. This should be the full path.
         :param float size: (optional) The font-size to use if it is a True Type font.
-        Set to None for bitmap fonts. (default=None)
+                           Set to None for bitmap fonts. (default=None)
         :param bool use: (optional) Whether or not the font should immediately be used.
-        (default=False)
+                         (default=False)
         """
         if size is not None:
             self._fonts[name] = ImageFont.truetype(file, size)
@@ -844,7 +844,7 @@ class OpenSignCanvas:
         """Set the current font
 
         :param string fontname: The name of the font to use. This should match the name parameter
-        used when adding the font.
+                                used when adding the font.
         """
         if self._fonts.get(fontname) is None:
             raise ValueError("Font name not found.")
@@ -854,7 +854,7 @@ class OpenSignCanvas:
         """Set the text stroke width and color
 
         :param int width: The stroke width to use. This is how wide the outline of
-        the text is in pixels.
+                          the text is in pixels.
         :param color: (optional) The color of the stroke. (default=None)
         :type color: tuple or list or int
         """
@@ -925,13 +925,13 @@ class OpenSignCanvas:
 
         :param string text: The text to add.
         :param color: (optional) The color of the text to override the current setting.
-        (default=Current Setting)
+                      (default=Current Setting)
         :param string fontname: (optional) The name of the font to override the current setting.
-        (default=Current Setting)
+                                (default=Current Setting)
         :param int stroke_width: (optional) The stroke width to override the current setting.
-        (default=Current Setting)
+                                 (default=Current Setting)
         :param stroke_color: (optional) The color of the stroke to override the current setting.
-        (default=Current Setting)
+                             (default=Current Setting)
         :param int x_offset: (optional) The amount of x-offset to nudge the text. (default=0)
         :param int y_offset: (optional) The amount of y-offset to nudge the text. (default=0)
         :type color: tuple or list or int
