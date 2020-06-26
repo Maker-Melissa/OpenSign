@@ -13,14 +13,16 @@ Introduction
     :target: https://github.com/psf/black
     :alt: Code Style: Black
 
-A Library to facilitate easy RGB Matrix Sign Animations.
+A library to facilitate easy RGB Matrix Sign Animations.
 
 
 Dependencies
 =============
 This driver depends on:
 
-* `Henner Zeller RPi RGB LED Matrix <https://github.com/hzeller/rpi-rgb-led-matrix>`_
+* `Henner Zeller RPi RGB LED Matrix <https://github.com/hzeller/rpi-rgb-led-matrix/>`_
+* `Python Bindings for RGB Matrix Library <https://github.com/hzeller/rpi-rgb-led-matrix/tree/master/bindings/python>`_
+* `Python Imaging Library (Pillow) <https://pypi.org/project/Pillow/>`_
 
 Installing from PyPI
 =====================
