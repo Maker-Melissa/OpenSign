@@ -47,7 +47,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/makermelissa/OpenSign.git"
 
-# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods, too-many-lines
 class OpenSign:
     """Main class that controls the sign and graphics effects."""
 
@@ -287,7 +287,7 @@ class OpenSign:
     def scroll_in_from_left(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the left side of the display over a certain period of
         time. The final position is centered.
-        
+
         :param canvas: The canvas to animate.
         :param float duration: The period of time to perform the animation over. (default=1)
         :param int x: (optional) The amount of x-offset from the center position (default=0)
@@ -306,9 +306,10 @@ class OpenSign:
     def scroll_in_from_right(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the right side of the display over a certain period of
         time. The final position is centered.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :param int x: (optional) The amount of x-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
@@ -325,9 +326,10 @@ class OpenSign:
     def scroll_in_from_top(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the top side of the display over a certain period of
         time. The final position is centered.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :param int y: (optional) The amount of y-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
@@ -344,9 +346,10 @@ class OpenSign:
     def scroll_in_from_bottom(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the bottom side of the display over a certain period of
         time. The final position is centered.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :param int y: (optional) The amount of y-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
@@ -363,9 +366,10 @@ class OpenSign:
     def scroll_out_to_left(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the left
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -379,9 +383,10 @@ class OpenSign:
     def scroll_out_to_right(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the right
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -395,9 +400,10 @@ class OpenSign:
     def scroll_out_to_top(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the top
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -411,9 +417,10 @@ class OpenSign:
     def scroll_out_to_bottom(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the bottom
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -426,7 +433,7 @@ class OpenSign:
 
     def set_position(self, canvas, x=0, y=0):
         """Instantly move the canvas to a specific location. (0, 0) is the top-left corner.
-        
+
         :param canvas: The canvas to move.
         :param int x: (optional) The x-position to move the canvas to. (default=0)
         :param int y: (optional) The y-position to move the canvas to. (default=0)
@@ -436,7 +443,7 @@ class OpenSign:
 
     def show(self, canvas):
         """Show the canvas at its current position.
-        
+
         :param canvas: The canvas to show.
         :type canvas: OpenSignCanvas
         """
@@ -445,7 +452,7 @@ class OpenSign:
 
     def hide(self, canvas):
         """Hide the canvas at its current position.
-        
+
         :param canvas: The canvas to hide.
         :type canvas: OpenSignCanvas
         """
@@ -458,7 +465,8 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to blink. (default=3)
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         delay = duration / count / 2
@@ -475,7 +483,8 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to flash. (default=3)
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         delay = duration / count / 2
@@ -488,9 +497,10 @@ class OpenSign:
         """Fade the foreground in over a certain period of time
         by a certain number of steps. More steps is smoother, but too high
         of a number may slow down the animation too much.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :param float steps: (optional) The number of steps to perform the animation. (default=50)
         :type canvas: OpenSignCanvas
         """
@@ -506,9 +516,10 @@ class OpenSign:
         """Fade the foreground out over a certain period of time
         by a certain number of steps. More steps is smoother, but too high
         of a number may slow down the animation too much.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :param float steps: (optional) The number of steps to perform the animation. (default=50)
         :type canvas: OpenSignCanvas
         """
@@ -526,9 +537,10 @@ class OpenSign:
     def join_in_horizontally(self, canvas, duration=0.5):
         """Show the effect of a split canvas joining horizontally
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
@@ -562,9 +574,10 @@ class OpenSign:
     def join_in_vertically(self, canvas, duration=0.5):
         """Show the effect of a split canvas joining vertically
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
@@ -598,9 +611,10 @@ class OpenSign:
     def split_out_horizontally(self, canvas, duration=0.5):
         """Show the effect of a canvas splitting horizontally
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -633,9 +647,10 @@ class OpenSign:
     def split_out_vertically(self, canvas, duration=0.5):
         """Show the effect of a canvas splitting vertically
         over a certain period of time.
-        
+
         :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=0.5)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -669,10 +684,11 @@ class OpenSign:
         """Loop a canvas towards the left side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the right and end up back a the
         starting position.
-        
+
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -698,10 +714,11 @@ class OpenSign:
         """Loop a canvas towards the right side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the left and end up back a the
         starting position.
-        
+
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -727,10 +744,11 @@ class OpenSign:
         """Loop a canvas towards the top side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the bottom and end up back a the
         starting position.
-        
+
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -756,10 +774,11 @@ class OpenSign:
         """Loop a canvas towards the bottom side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the top and end up back a the
         starting position.
-        
+
         :param canvas: The canvas to animate.
         :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over.
+        (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
@@ -805,7 +824,15 @@ class OpenSignCanvas:
 
     def add_font(self, name, file, size=None, use=False):
         """Add a font to the font pool. If there is no current font set,
-        then the new font will automatically become the current font"""
+        then the new font will automatically become the current font
+
+        :param string name: The name of the font. This is used when setting the font.
+        :param string file: The filename of the font. This should be the full path.
+        :param float size: (optional) The font-size to use if it is a True Type font.
+        Set to None for bitmap fonts. (default=None)
+        :param bool use: (optional) Whether or not the font should immediately be used.
+        (default=False)
+        """
         if size is not None:
             self._fonts[name] = ImageFont.truetype(file, size)
         else:
@@ -814,13 +841,23 @@ class OpenSignCanvas:
             self._current_font = self._fonts[name]
 
     def set_font(self, fontname):
-        """Set the current font"""
+        """Set the current font
+
+        :param string fontname: The name of the font to use. This should match the name parameter
+        used when adding the font.
+        """
         if self._fonts.get(fontname) is None:
             raise ValueError("Font name not found.")
         self._current_font = self._fonts[fontname]
 
     def set_stroke(self, width, color=None):
-        """Set the text stroke width and color"""
+        """Set the text stroke width and color
+
+        :param int width: The stroke width to use. This is how wide the outline of
+        the text is in pixels.
+        :param color: (optional) The color of the stroke. (default=None)
+        :type color: tuple or list or int
+        """
         self._stroke_width = width
         if color is not None:
             self._stroke_color = self._convert_color(color)
@@ -855,18 +892,21 @@ class OpenSignCanvas:
         self._draw = ImageDraw.Draw(self._image)
 
     def set_color(self, color):
-        """Set the current text color"""
+        """Set the current text color.
+
+        :param color: The color of the text.
+        :type color: tuple or list or int
+        """
         self._current_color = self._convert_color(color)
 
     def set_shadow(self, intensity=0.5, offset=1):
         """Set the canvas to display a shadow of the content. To turn shadow off, set
-        the intensity to 0. The shadow is global for the entire canvas."""
-        if intensity < 0:
-            intensity = 0
-        if intensity > 1:
-            intensity = 1
-        if offset < 0:
-            offset = 0
+        the intensity to 0. The shadow is global for the entire canvas.
+
+        :param float intensity: (optional) The opaquness of the shadow (default=0.5).
+        :param int offset: (optional) The offset in pixels towards the lower right (default=1).
+        """
+        intensity = max(0, min(1.0, intensity))
         self._shadow_intensity = intensity
         self._shadow_offset = offset
 
@@ -881,7 +921,22 @@ class OpenSignCanvas:
         x_offset=0,
         y_offset=0,
     ):
-        """Add text to the canvas"""
+        """Add text to the canvas.
+
+        :param string text: The text to add.
+        :param color: (optional) The color of the text to override the current setting.
+        (default=Current Setting)
+        :param string fontname: (optional) The name of the font to override the current setting.
+        (default=Current Setting)
+        :param int stroke_width: (optional) The stroke width to override the current setting.
+        (default=Current Setting)
+        :param stroke_color: (optional) The color of the stroke to override the current setting.
+        (default=Current Setting)
+        :param int x_offset: (optional) The amount of x-offset to nudge the text. (default=0)
+        :param int y_offset: (optional) The amount of y-offset to nudge the text. (default=0)
+        :type color: tuple or list or int
+        :type stroke_color: tuple or list or int
+        """
         if font is not None:
             font = self._fonts[font]
         else:
@@ -920,7 +975,10 @@ class OpenSignCanvas:
     # pylint: enable=too-many-arguments
 
     def add_image(self, file):
-        """Add an image to the canvas."""
+        """Add an image to the canvas.
+
+        :param string file: The filename of the image. This should be the full path.
+        """
         x, y = self._cursor
         new_image = Image.open(file).convert("RGBA")
         self._enlarge_canvas(new_image.width, new_image.height)
