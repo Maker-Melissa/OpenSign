@@ -286,7 +286,13 @@ class OpenSign:
 
     def scroll_in_from_left(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the left side of the display over a certain period of
-        time. The final position is centered."""
+        time. The final position is centered.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: The period of time to perform the animation over. (default=1)
+        :param int x: (optional) The amount of x-offset from the center position (default=0)
+        :type canvas: OpenSignCanvas
+        """
         current_x = 0 - canvas.width
         current_y = int(self._matrix.height / 2 - canvas.height / 2)
         self._draw(canvas, current_x, current_y)
@@ -299,7 +305,13 @@ class OpenSign:
 
     def scroll_in_from_right(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the right side of the display over a certain period of
-        time. The final position is centered."""
+        time. The final position is centered.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param int x: (optional) The amount of x-offset from the center position (default=0)
+        :type canvas: OpenSignCanvas
+        """
         current_x = self._matrix.width
         current_y = int(self._matrix.height / 2 - canvas.height / 2)
         self._draw(canvas, current_x, current_y)
@@ -312,7 +324,13 @@ class OpenSign:
 
     def scroll_in_from_top(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the top side of the display over a certain period of
-        time. The final position is centered."""
+        time. The final position is centered.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param int y: (optional) The amount of y-offset from the center position (default=0)
+        :type canvas: OpenSignCanvas
+        """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
         current_y = 0 - canvas.height
         self._draw(canvas, current_x, current_y)
@@ -325,7 +343,13 @@ class OpenSign:
 
     def scroll_in_from_bottom(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the bottom side of the display over a certain period of
-        time. The final position is centered."""
+        time. The final position is centered.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param int y: (optional) The amount of y-offset from the center position (default=0)
+        :type canvas: OpenSignCanvas
+        """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
         current_y = self._matrix.height
         self._draw(canvas, current_x, current_y)
@@ -338,7 +362,12 @@ class OpenSign:
 
     def scroll_out_to_left(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the left
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = current_x + canvas.width
         while current_x + canvas.width > 0:
@@ -349,7 +378,12 @@ class OpenSign:
 
     def scroll_out_to_right(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the right
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = self._matrix.width - current_x
         while current_x < self._matrix.width:
@@ -360,7 +394,12 @@ class OpenSign:
 
     def scroll_out_to_top(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the top
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = current_y + canvas.height
         while current_y + canvas.height > 0:
@@ -371,7 +410,12 @@ class OpenSign:
 
     def scroll_out_to_bottom(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the bottom
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = self._matrix.height - current_y
         while current_y < self._matrix.height:
@@ -381,22 +425,42 @@ class OpenSign:
             self._wait(start_time, duration / distance)
 
     def set_position(self, canvas, x=0, y=0):
-        """Instantly move the canvas to a specific location."""
+        """Instantly move the canvas to a specific location. (0, 0) is the top-left corner.
+        
+        :param canvas: The canvas to move.
+        :param int x: (optional) The x-position to move the canvas to. (default=0)
+        :param int y: (optional) The y-position to move the canvas to. (default=0)
+        :type canvas: OpenSignCanvas
+        """
         self._draw(canvas, x, y)
 
     def show(self, canvas):
-        """Show the canvas at its current position."""
+        """Show the canvas at its current position.
+        
+        :param canvas: The canvas to show.
+        :type canvas: OpenSignCanvas
+        """
         x, y = self._position
         self._draw(canvas, x, y)
 
     def hide(self, canvas):
-        """Hide the canvas at its current position."""
+        """Hide the canvas at its current position.
+        
+        :param canvas: The canvas to hide.
+        :type canvas: OpenSignCanvas
+        """
         x, y = self._position
         self._draw(canvas, x, y, opacity=0)
 
-    def blink(self, canvas, count=1, duration=1):
+    def blink(self, canvas, count=3, duration=1):
         """Blink the foreground on and off a centain number of
-        times over a certain period of time."""
+        times over a certain period of time.
+
+        :param canvas: The canvas to animate.
+        :param float count: (optional) The number of times to blink. (default=3)
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         delay = duration / count / 2
         for _ in range(count):
             start_time = time.monotonic()
@@ -407,7 +471,13 @@ class OpenSign:
 
     def flash(self, canvas, count=1, duration=1):
         """Fade the foreground in and out a centain number of
-        times over a certain period of time."""
+        times over a certain period of time.
+
+        :param canvas: The canvas to animate.
+        :param float count: (optional) The number of times to flash. (default=3)
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         delay = duration / count / 2
         steps = 50 // count
         for _ in range(count):
@@ -416,7 +486,14 @@ class OpenSign:
 
     def fade_in(self, canvas, duration=1, steps=50):
         """Fade the foreground in over a certain period of time
-        by a certain number of steps."""
+        by a certain number of steps. More steps is smoother, but too high
+        of a number may slow down the animation too much.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float steps: (optional) The number of steps to perform the animation. (default=50)
+        :type canvas: OpenSignCanvas
+        """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
         current_y = int(self._matrix.height / 2 - canvas.height / 2)
         delay = duration / (steps + 1)
@@ -427,7 +504,14 @@ class OpenSign:
 
     def fade_out(self, canvas, duration=1, steps=50):
         """Fade the foreground out over a certain period of time
-        by a certain number of steps."""
+        by a certain number of steps. More steps is smoother, but too high
+        of a number may slow down the animation too much.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :param float steps: (optional) The number of steps to perform the animation. (default=50)
+        :type canvas: OpenSignCanvas
+        """
         delay = duration / (steps + 1)
         for opacity in range(steps + 1):
             start_time = time.monotonic()
@@ -441,7 +525,12 @@ class OpenSign:
 
     def join_in_horizontally(self, canvas, duration=0.5):
         """Show the effect of a split canvas joining horizontally
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :type canvas: OpenSignCanvas
+        """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
         current_y = int(self._matrix.height / 2 - canvas.height / 2)
         image = canvas.get_image()
@@ -472,7 +561,12 @@ class OpenSign:
 
     def join_in_vertically(self, canvas, duration=0.5):
         """Show the effect of a split canvas joining vertically
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :type canvas: OpenSignCanvas
+        """
         current_x = int(self._matrix.width / 2 - canvas.width / 2)
         current_y = int(self._matrix.height / 2 - canvas.height / 2)
         image = canvas.get_image()
@@ -503,7 +597,12 @@ class OpenSign:
 
     def split_out_horizontally(self, canvas, duration=0.5):
         """Show the effect of a canvas splitting horizontally
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         image = canvas.get_image()
         left_image = image.crop(box=(0, 0, image.width // 2 + 1, image.height))
@@ -533,7 +632,12 @@ class OpenSign:
 
     def split_out_vertically(self, canvas, duration=0.5):
         """Show the effect of a canvas splitting vertically
-        over a certain period of time."""
+        over a certain period of time.
+        
+        :param canvas: The canvas to animate.
+        :param float duration: (optional) The period of time to perform the animation over. (default=0.5)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         image = canvas.get_image()
         top_image = image.crop(box=(0, 0, image.width, image.height // 2 + 1))
@@ -564,7 +668,13 @@ class OpenSign:
     def loop_left(self, canvas, duration=1, count=1):
         """Loop a canvas towards the left side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the right and end up back a the
-        starting position."""
+        starting position.
+        
+        :param canvas: The canvas to animate.
+        :param float count: (optional) The number of times to loop. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = max(canvas.width, self._matrix.width)
         loop_image = self._create_loop_image(canvas.get_image(), distance, 0)
@@ -587,7 +697,13 @@ class OpenSign:
     def loop_right(self, canvas, duration=1, count=1):
         """Loop a canvas towards the right side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the left and end up back a the
-        starting position."""
+        starting position.
+        
+        :param canvas: The canvas to animate.
+        :param float count: (optional) The number of times to loop. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = max(canvas.width, self._matrix.width)
         loop_image = self._create_loop_image(canvas.get_image(), distance, 0)
@@ -610,7 +726,13 @@ class OpenSign:
     def loop_up(self, canvas, duration=0.5, count=1):
         """Loop a canvas towards the top side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the bottom and end up back a the
-        starting position."""
+        starting position.
+        
+        :param canvas: The canvas to animate.
+        :param float count: (optional) The number of times to loop. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = max(canvas.height, self._matrix.height)
         loop_image = self._create_loop_image(canvas.get_image(), 0, distance)
@@ -633,7 +755,13 @@ class OpenSign:
     def loop_down(self, canvas, duration=0.5, count=1):
         """Loop a canvas towards the bottom side of the display over a certain period of time by a
         certain number of times. The canvas will re-enter from the top and end up back a the
-        starting position."""
+        starting position.
+        
+        :param canvas: The canvas to animate.
+        :param float count: (optional) The number of times to loop. (default=1)
+        :param float duration: (optional) The period of time to perform the animation over. (default=1)
+        :type canvas: OpenSignCanvas
+        """
         current_x, current_y = self._position
         distance = max(canvas.height, self._matrix.height)
         loop_image = self._create_loop_image(canvas.get_image(), 0, distance)
