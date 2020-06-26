@@ -36,9 +36,10 @@ jobs:
         sudo apt-get install -y gettext
         pip install -r requirements.txt
     - name: Compile RGB Matrix Library Python Bindings
+      working-directory: ./rpi-rgb-led-matrix/bindings/python/
       run: |
         make build-python PYTHON=$(which python3)
-        sudo make -f install-python PYTHON=$(which python3)
+        sudo make install-python PYTHON=$(which python3)
     - name: Pip install pylint, black, & Sphinx
       run: |
         pip install --force-reinstall pylint black==19.10b0 Sphinx sphinx-rtd-theme
