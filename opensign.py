@@ -656,9 +656,7 @@ class OpenSign:
         current_x, current_y = self._position
         image = canvas.get_image()
         top_image = image.crop(box=(0, 0, image.width, image.height // 2))
-        bottom_image = image.crop(
-            box=(0, image.height // 2, image.width, image.height)
-        )
+        bottom_image = image.crop(box=(0, image.height // 2, image.width, image.height))
         distance = self._matrix.height // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
