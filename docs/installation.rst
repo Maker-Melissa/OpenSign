@@ -10,17 +10,19 @@ If you didn't set up WiFi already, be sure the Raspberry Pi is plugged into your
 
 Plug in power and let the Raspberry Pi boot.
 
-Wait for a few minutes and then SSH into the Raspberry Pi using an SSH client such as PuTTY for windows or command line ssh on macOS or Linux.
+Wait for a few minutes and then SSH into the Raspberry Pi using an SSH client such as PuTTY for windows or command line SSH on macOS or Linux.
 
 Start raspi-config::
 
     sudo raspi-config
 
-If you haven't already and want to enable WiFi, you can do so now by choosing ``Open Network Options`` -> ``Wireless LAN`` and follow the prompts
+You can change your password by going to ``Change User Password``, which is recommended for security.
 
-Be sure to set your Timezone by going to ``Localisation Options`` -> ``Change Timezone``
+If you haven't already and want to enable WiFi, you can do so now by choosing ``Open Network Options`` > ``Wireless LAN`` and follow the prompts.
 
-You can change your password here as well, which is recommended for security.
+Be sure to set your Timezone by going to ``Localisation Options`` > ``Change Timezone``.
+
+If you would like to change your hostname so that it doesn't conflict with any other Raspberry Pi, you can do so by choosing ``Network Options`` > ``Hostname``.
 
 After that you can exit the utility.
 
