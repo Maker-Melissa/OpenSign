@@ -61,3 +61,23 @@ Install OpenSign
 Install OpenSign via PyPI::
 
     sudo pip3 install opensign
+
+
+Automatically Start on Boot
+============================
+To automatically start a python script on boot, the easiest way is to put it in **/etc/rc.local**
+
+.. warning::
+    Verify your script is working before doing this by running it from the command line first. If there are any bugs, it just won't start.
+
+Edit the file using::
+
+    sudo nano /etc/rc.local
+
+Insert a new line right before ``exit 0``
+
+Assuming your username is pi and your script is in your home directory and called startup.py, the new line should be::
+
+    sudo python3 /home/pi/startup.py &
+
+Save, exit, and reboot. Your sign should come to life.
