@@ -551,7 +551,7 @@ class OpenSign:
             box=(image.width // 2 + 1, 0, image.width, image.height)
         )
         distance = self._matrix.width // 2
-        for i in range(distance):
+        for i in range(distance + 1):
             start_time = time.monotonic()
             effect_image = Image.new(
                 "RGBA", (self._matrix.width + image.width, image.height), (0, 0, 0, 0)
@@ -588,7 +588,7 @@ class OpenSign:
             box=(0, image.height // 2 + 1, image.width, image.height)
         )
         distance = self._matrix.height // 2
-        for i in range(distance):
+        for i in range(distance + 1):
             start_time = time.monotonic()
             effect_image = Image.new(
                 "RGBA", (image.width, self._matrix.height + image.height), (0, 0, 0, 0)
@@ -655,9 +655,9 @@ class OpenSign:
         """
         current_x, current_y = self._position
         image = canvas.get_image()
-        top_image = image.crop(box=(0, 0, image.width, image.height // 2 + 1))
+        top_image = image.crop(box=(0, 0, image.width, image.height // 2))
         bottom_image = image.crop(
-            box=(0, image.height // 2 + 1, image.width, image.height)
+            box=(0, image.height // 2, image.width, image.height)
         )
         distance = self._matrix.height // 2
         for i in range(distance + 1):

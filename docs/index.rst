@@ -10,15 +10,20 @@ Table of Contents
     self
 
 .. toctree::
-    :caption: Examples
+    :caption: Installation
 
-    examples
+    installation
 
 .. toctree::
     :caption: API Reference
     :maxdepth: 3
 
     api
+
+.. toctree::
+    :caption: Examples
+
+    examples
 
 Indices and tables
 ==================
