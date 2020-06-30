@@ -1,6 +1,6 @@
 Raspberry Pi Setup
 ===================
-Start by download Raspberry Pi OS Lite from https://www.raspberrypi.org/downloads/raspberry-pi-os/. Once it is done downloading, flash the image onto a Micro SD card using a program such as `balenaEthcer <https://www.balena.io/etcher/>`_.
+Start by download Raspberry Pi OS Lite from https://www.raspberrypi.org/downloads/raspberry-pi-os/. Once it is done downloading, flash the image onto a Micro SD card using a program such as `balenaEtcher <https://www.balena.io/etcher/>`_.
 
 Mount the SD card on a computer and create an empty file named "ssh" inside the boot partition. If you only have a WiFi networking, you'll want to create a wpa_supplicant.conf file as well following `these instructions <https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md>`_. Otherwise, you can wait a bit and use raspi-config to do it the easy way.
 
@@ -16,9 +16,9 @@ Start raspi-config::
 
     sudo raspi-config
 
-If you haven't already and want to enable WiFi, you can do so now by choosing Open Network Options -> Wireless LAN and follow the prompts
+If you haven't already and want to enable WiFi, you can do so now by choosing ``Open Network Options`` -> ``Wireless LAN`` and follow the prompts
 
-Be sure to set your Timezone by going to Localisation Options -> Change Timezone
+Be sure to set your Timezone by going to ``Localisation Options`` -> ``Change Timezone``
 
 You can change your password here as well, which is recommended for security.
 
@@ -56,7 +56,7 @@ Install the Henner Zeller RPi RGB LED Matrix Python Bindings::
     make build-python PYTHON=$(which python3)
     sudo make install-python PYTHON=$(which python3)
 
-Install opensign
+Install OpenSign
 =================
 Install OpenSign via PyPI::
 
