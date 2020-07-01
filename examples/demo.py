@@ -1,13 +1,23 @@
 #!/usr/bin/env python
 from opensign import OpenSign, OpenSignCanvas
 
+"""
+Script
+Scroll in text
+an images
+Fade text in
+and fade out
+
+
+
+"""
+
 
 def main():
     message1 = OpenSignCanvas()
     message1.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
     message1.set_stroke(1, (255, 255, 255))
-    message1.add_text("Hello ", color=(255, 0, 0))
-    message1.add_text("World!", color=(128, 255, 0))
+    message1.add_text("Scroll Text In", color=(255, 0, 0))
     message1.set_shadow()
 
     message2 = OpenSignCanvas()
@@ -31,9 +41,22 @@ def main():
     message4.set_shadow()
 
     circuit_image = "background.jpg"
-
     sign = OpenSign(chain=6)
     sign.set_background_image(circuit_image)
+
+    while True:
+        sign.scroll_in_from_left(message1)
+        sign.sleep(1)
+        message1.clear()
+        message1.add_text("Change Messages")
+        sign.show(message1)
+        sign.sleep(1)
+        message1.clear()
+        message1.add_text("And Scroll Out")
+        sign.show(message1)
+        sign.scroll_out_to_right(message1)
+        sign.sleep(1)
+
     sign.join_in_vertically(message1)
     sign.loop_left(message1)
     sign.flash(message1, count=3)

@@ -70,7 +70,10 @@ Automatically Start on Boot
 To automatically start a python script on boot, the easiest way is to put it in **/etc/rc.local**
 
 .. warning::
-    Verify your script is working before doing this by running it from the command line first. If there are any bugs, it just won't start.
+    If you are using any images in your script, be sure to use absolute paths because the script is not run from your home folder.
+
+.. warning::
+    Verify your script is working before doing this by running it from the command line first. If there are any bugs, it just won't start. You can check the specific errors by running ``systemctl status rc.local.service``.
 
 Edit the file using::
 
