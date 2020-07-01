@@ -18,7 +18,7 @@ Start raspi-config::
 
 You can change your password by going to ``Change User Password``, which is recommended for security.
 
-If you haven't already and want to enable WiFi, you can do so now by choosing ``Open Network Options`` > ``Wireless LAN`` and follow the prompts.
+If you haven't already and want to enable WiFi, you can do so now by choosing ``Network Options`` > ``Wireless LAN`` and follow the prompts.
 
 Be sure to set your Timezone by going to ``Localisation Options`` > ``Change Timezone``.
 
