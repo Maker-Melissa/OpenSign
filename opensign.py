@@ -240,8 +240,7 @@ class OpenSign:
 
     # pylint: disable=no-self-use
     def _create_loop_image(self, image, x_offset, y_offset):
-        """Attach a copy of an image by a certain offset so it can be looped.
-        """
+        """Attach a copy of an image by a certain offset so it can be looped."""
         loop_image = Image.new(
             "RGBA", (image.width + x_offset, image.height + y_offset), (0, 0, 0, 0)
         )
@@ -956,19 +955,25 @@ class OpenSignCanvas:
         if stroke_width is None:
             stroke_width = self._stroke_width
 
-        (text_width, text_height) = font.getsize(text, stroke_width=self._stroke_width)
-        self._enlarge_canvas(text_width, text_height)
-        # Draw the text
-        self._draw.text(
-            (x + x_offset, y + y_offset),
-            text,
-            font=font,
-            fill=color,
-            stroke_width=stroke_width,
-            stroke_fill=stroke_color,
-        )
-        # Get size and add to cursor
-        self._cursor[0] += text_width
+        lines = text.split("\n")
+        for index, line in enumerate(lines):
+            (text_width, text_height) = font.getsize(line, stroke_width=stroke_width)
+            self._enlarge_canvas(text_width, text_height)
+            # Draw the text
+            self._draw.text(
+                (x + x_offset, y + y_offset),
+                line,
+                font=font,
+                fill=color,
+                stroke_width=stroke_width,
+                stroke_fill=stroke_color,
+            )
+            # Get size and add to cursor
+            self._cursor[0] += text_width
+            if index < len(lines) - 1:
+                y += text_height
+                self._cursor[0] = 0
+                self._cursor[1] += text_height
 
     # pylint: enable=too-many-arguments
 
