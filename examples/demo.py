@@ -2,15 +2,6 @@
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 
-"""
-Script
-Scroll in text
-an images
-Fade text in
-and fade out
-"""
-
-
 def main():
     message1 = OpenSignCanvas()
     message1.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)

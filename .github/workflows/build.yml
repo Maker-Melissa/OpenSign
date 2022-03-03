@@ -51,7 +51,7 @@ jobs:
     - name: PyLint
       run: |
         pylint opensign/*.py
-        ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace $( find . -path "./examples/*.py" ))
+        ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace,duplicate-code $( find . -path "./examples/*.py" ))
     - name: Build docs
       working-directory: docs
       run: sphinx-build -E -W -b html . _build/html
