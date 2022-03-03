@@ -2,6 +2,7 @@
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 
+
 def main():
     message1 = OpenSignCanvas()
     message1.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
