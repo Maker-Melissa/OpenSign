@@ -70,7 +70,7 @@ class OpenSign:
         pwm_lsb_nanoseconds=130,
         row_addr_type=0,
         multiplexing=0,
-        pixel_mapper=""
+        pixel_mapper="",
     ):
         options = RGBMatrixOptions()
 
@@ -240,7 +240,9 @@ class OpenSign:
     # pylint: enable=no-self-use
 
     def _get_centered_position(self, canvas):
-        return int(self._matrix.width / 2 - canvas.width / 2), int(self._matrix.height / 2 - canvas.height / 2)
+        return int(self._matrix.width / 2 - canvas.width / 2), int(
+            self._matrix.height / 2 - canvas.height / 2
+        )
 
     def set_background_color(self, color):
         """Sets the background to a solid color. The color should be a 3 or 4 value
@@ -264,7 +266,7 @@ class OpenSign:
         if os.path.exists(file):
             self._background = file
         else:
-            raise ValueError("Specified background file {} was not found".format(file))
+            raise ValueError(f"Specified background file {file} was not found")
 
     @staticmethod
     def _wait(start_time, duration):
@@ -273,6 +275,7 @@ class OpenSign:
             pass
         return time.monotonic()
 
+    # pylint: disable=too-many-arguments
     def scroll_from_to(self, canvas, duration, start_x, start_y, end_x, end_y):
         """
         Scroll the canvas from one position to another over a certain period of
@@ -297,7 +300,9 @@ class OpenSign:
             current_y = start_y + round(i * increment_y)
             self._draw(canvas, current_x, current_y)
             if i <= steps:
-                self._wait(start_time, duration / steps)        
+                self._wait(start_time, duration / steps)
+
+    # pylint: enable=too-many-arguments
 
     def scroll_in_from_left(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the left side of the display over a certain period of
@@ -310,7 +315,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, 0 - canvas.width, center_y, center_x + x, center_y)
+        self.scroll_from_to(
+            canvas, duration, 0 - canvas.width, center_y, center_x + x, center_y
+        )
 
     def scroll_in_from_right(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the right side of the display over a certain period of
@@ -323,7 +330,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, self._matrix.width, center_y, center_x + x, center_y)
+        self.scroll_from_to(
+            canvas, duration, self._matrix.width, center_y, center_x + x, center_y
+        )
 
     def scroll_in_from_top(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the top side of the display over a certain period of
@@ -336,7 +345,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, center_x, 0 - canvas.height, center_x, center_y + y)
+        self.scroll_from_to(
+            canvas, duration, center_x, 0 - canvas.height, center_x, center_y + y
+        )
 
     def scroll_in_from_bottom(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the bottom side of the display over a certain period of
@@ -349,7 +360,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, center_x, self._matrix.height, center_x, center_y + y)
+        self.scroll_from_to(
+            canvas, duration, center_x, self._matrix.height, center_x, center_y + y
+        )
 
     def scroll_out_to_left(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the left
@@ -361,7 +374,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, 0 - canvas.width, current_y)
+        self.scroll_from_to(
+            canvas, duration, current_x, current_y, 0 - canvas.width, current_y
+        )
 
     def scroll_out_to_right(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the right
@@ -373,7 +388,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, self._matrix.width, current_y)
+        self.scroll_from_to(
+            canvas, duration, current_x, current_y, self._matrix.width, current_y
+        )
 
     def scroll_out_to_top(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the top
@@ -385,7 +402,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, 0 - canvas.height)
+        self.scroll_from_to(
+            canvas, duration, current_x, current_y, current_x, 0 - canvas.height
+        )
 
     def scroll_out_to_bottom(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the bottom
@@ -397,7 +416,9 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, self._matrix.height)
+        self.scroll_from_to(
+            canvas, duration, current_x, current_y, current_x, self._matrix.height
+        )
 
     def set_position(self, canvas, x=0, y=0):
         """Instantly move the canvas to a specific location. (0, 0) is the top-left corner.

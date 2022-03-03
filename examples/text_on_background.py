@@ -2,6 +2,7 @@
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 
+
 def main():
     message = OpenSignCanvas()
     message.add_font(

@@ -13,10 +13,12 @@ and fade out
 
 """
 
+
 def duplicate(item_to_duplicate):
     new_canvas = copy.copy(item_to_duplicate)
     new_canvas.clear()
     return new_canvas
+
 
 def main():
     message1 = OpenSignCanvas()

@@ -44,6 +44,7 @@ from PIL import Image, ImageDraw, ImageFont
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/makermelissa/OpenSign.git"
 
+
 class OpenSignCanvas:
     """The Canvas is an empty image that you add text and graphics to. It will automatically
     expand as you add content. You can then display the canvas on the sign and use the animation
@@ -259,8 +260,7 @@ class OpenSignCanvas:
     def shadow_offset(self, value):
         if not isinstance(value, int):
             raise TypeError("Shadow offset must be an integer")
-        if value < 0:
-            value = 0
+        value = max(value, 0)
         self._shadow_offset = value
 
     @property
