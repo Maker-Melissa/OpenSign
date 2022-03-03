@@ -41,7 +41,7 @@ Implementation Notes
 
 import time
 import os
-from PIL import Image, ImageDraw, ImageFont, ImageChops
+from PIL import Image, ImageChops
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 __version__ = "0.0.0-auto.0"
@@ -100,17 +100,6 @@ class OpenSign:
         self._background = (0, 0, 0)
         self._position = (0, 0)
         # pylint: enable=too-many-locals
-
-    # pylint: disable=no-self-use
-    def sleep(self, value):
-        """Sleep for the specified time. Mainly a shortcut, so
-        you don't need to import time.
-
-        :param float value: The time to sleep in seconds.
-        """
-        time.sleep(value)
-
-    # pylint: enable=no-self-use
 
     def _update(self):
         self._buffer = self._matrix.SwapOnVSync(self._buffer)
@@ -250,6 +239,9 @@ class OpenSign:
 
     # pylint: enable=no-self-use
 
+    def _get_centered_position(self, canvas):
+        return int(self._matrix.width / 2 - canvas.width / 2), int(self._matrix.height / 2 - canvas.height / 2)
+
     def set_background_color(self, color):
         """Sets the background to a solid color. The color should be a 3 or 4 value
         tuple or list or an hexidecimal value in the format of 0xRRGGBB.
@@ -274,33 +266,51 @@ class OpenSign:
         else:
             raise ValueError("Specified background file {} was not found".format(file))
 
-    # pylint: disable=no-self-use
-    def _wait(self, start_time, duration):
+    @staticmethod
+    def _wait(start_time, duration):
         """Uses time.monotonic() to wait from the start time for a specified duration"""
         while time.monotonic() < (start_time + duration):
             pass
         return time.monotonic()
 
-    # pylint: enable=no-self-use
+    def scroll_from_to(self, canvas, duration, start_x, start_y, end_x, end_y):
+        """
+        Scroll the canvas from one position to another over a certain period of
+        time.
+
+        :param canvas: The canvas to animate.
+        :param float duration: The period of time to perform the animation over in seconds.
+        :param int start_x: The Starting X Position
+        :param int start_yx: The Starting Y Position
+        :param int end_x: The Ending X Position
+        :param int end_y: The Ending Y Position
+        :type canvas: OpenSignCanvas
+        """
+        steps = max(abs(end_x - start_x), abs(end_y - start_y))
+        if not steps:
+            return
+        increment_x = (end_x - start_x) / steps
+        increment_y = (end_y - start_y) / steps
+        for i in range(steps + 1):
+            start_time = time.monotonic()
+            current_x = start_x + round(i * increment_x)
+            current_y = start_y + round(i * increment_y)
+            self._draw(canvas, current_x, current_y)
+            if i <= steps:
+                self._wait(start_time, duration / steps)        
 
     def scroll_in_from_left(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the left side of the display over a certain period of
         time. The final position is centered.
 
         :param canvas: The canvas to animate.
-        :param float duration: The period of time to perform the animation over. (default=1)
+        :param float duration: (optional) The period of time to perform the animation
+                               over in seconds. (default=1)
         :param int x: (optional) The amount of x-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
-        current_x = 0 - canvas.width
-        current_y = int(self._matrix.height / 2 - canvas.height / 2)
-        self._draw(canvas, current_x, current_y)
-        distance = int(self._matrix.width / 2 - canvas.width / 2) - current_x + x
-        for i in range(distance):
-            start_time = time.monotonic()
-            current_x = i - canvas.width + 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        center_x, center_y = self._get_centered_position(canvas)
+        self.scroll_from_to(canvas, duration, 0 - canvas.width, center_y, center_x + x, center_y)
 
     def scroll_in_from_right(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the right side of the display over a certain period of
@@ -308,19 +318,12 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
+                               over in seconds. (default=1)
         :param int x: (optional) The amount of x-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
-        current_x = self._matrix.width
-        current_y = int(self._matrix.height / 2 - canvas.height / 2)
-        self._draw(canvas, current_x, current_y)
-        distance = current_x - int(self._matrix.width / 2 - canvas.width / 2) + x
-        for i in range(distance):
-            start_time = time.monotonic()
-            current_x = self._matrix.width - i - 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        center_x, center_y = self._get_centered_position(canvas)
+        self.scroll_from_to(canvas, duration, self._matrix.width, center_y, center_x + x, center_y)
 
     def scroll_in_from_top(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the top side of the display over a certain period of
@@ -328,19 +331,12 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
+                               over in seconds. (default=1)
         :param int y: (optional) The amount of y-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
-        current_x = int(self._matrix.width / 2 - canvas.width / 2)
-        current_y = 0 - canvas.height
-        self._draw(canvas, current_x, current_y)
-        distance = int(self._matrix.height / 2 - canvas.height / 2) - current_y + y
-        for i in range(distance):
-            start_time = time.monotonic()
-            current_y = i - canvas.height + 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        center_x, center_y = self._get_centered_position(canvas)
+        self.scroll_from_to(canvas, duration, center_x, 0 - canvas.height, center_x, center_y + y)
 
     def scroll_in_from_bottom(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the bottom side of the display over a certain period of
@@ -348,19 +344,12 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
+                               over in seconds. (default=1)
         :param int y: (optional) The amount of y-offset from the center position (default=0)
         :type canvas: OpenSignCanvas
         """
-        current_x = int(self._matrix.width / 2 - canvas.width / 2)
-        current_y = self._matrix.height
-        self._draw(canvas, current_x, current_y)
-        distance = current_y - int(self._matrix.height / 2 - canvas.height / 2) + y
-        for i in range(distance):
-            start_time = time.monotonic()
-            current_y = self._matrix.height - i - 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        center_x, center_y = self._get_centered_position(canvas)
+        self.scroll_from_to(canvas, duration, center_x, self._matrix.height, center_x, center_y + y)
 
     def scroll_out_to_left(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the left
@@ -368,16 +357,11 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
+                               over in seconds. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        distance = current_x + canvas.width
-        while current_x + canvas.width > 0:
-            start_time = time.monotonic()
-            current_x = current_x - 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        self.scroll_from_to(canvas, duration, current_x, current_y, 0 - canvas.width, current_y)
 
     def scroll_out_to_right(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the right
@@ -385,16 +369,11 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
+                               over in seconds. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        distance = self._matrix.width - current_x
-        while current_x < self._matrix.width:
-            start_time = time.monotonic()
-            current_x = current_x + 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        self.scroll_from_to(canvas, duration, current_x, current_y, self._matrix.width, current_y)
 
     def scroll_out_to_top(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the top
@@ -402,16 +381,11 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
+                               over in seconds. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        distance = current_y + canvas.height
-        while current_y + canvas.height > 0:
-            start_time = time.monotonic()
-            current_y = current_y - 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, 0 - canvas.height)
 
     def scroll_out_to_bottom(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the bottom
@@ -419,16 +393,11 @@ class OpenSign:
 
         :param canvas: The canvas to animate.
         :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
+                               over in seconds. (default=1)
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        distance = self._matrix.height - current_y
-        while current_y < self._matrix.height:
-            start_time = time.monotonic()
-            current_y = current_y + 1
-            self._draw(canvas, current_x, current_y)
-            self._wait(start_time, duration / distance)
+        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, self._matrix.height)
 
     def set_position(self, canvas, x=0, y=0):
         """Instantly move the canvas to a specific location. (0, 0) is the top-left corner.
@@ -796,265 +765,3 @@ class OpenSign:
                     canvas.shadow_offset,
                 )
                 self._wait(start_time, duration / distance / count)
-
-
-# pylint: enable=too-many-public-methods
-
-
-class OpenSignCanvas:
-    """The Canvas is an empty image that you add text and graphics to. It will automatically
-    expand as you add content. You can then display the canvas on the sign and use the animation
-    functions to convey it."""
-
-    def __init__(self):
-        self._fonts = {}
-        self._current_font = None
-        self._current_color = (255, 0, 0, 255)
-        self._image = Image.new("RGBA", (0, 0), (0, 0, 0, 0))
-        self._draw = ImageDraw.Draw(self._image)
-        self._cursor = [0, 0]
-        self._stroke_width = 0
-        self._stroke_color = None
-        self._shadow_intensity = 0
-        self._shadow_offset = 0
-        self._opacity = 1.0
-
-    def add_font(self, name, file, size=None, use=False):
-        """Add a font to the font pool. If there is no current font set,
-        then the new font will automatically become the current font
-
-        :param string name: The name of the font. This is used when setting the font.
-        :param string file: The filename of the font. This should be the full path.
-        :param float size: (optional) The font-size to use if it is a True Type font.
-                           Set to None for bitmap fonts. (default=None)
-        :param bool use: (optional) Whether or not the font should immediately be used.
-                         (default=False)
-        """
-        if size is not None:
-            self._fonts[name] = ImageFont.truetype(file, size)
-        else:
-            self._fonts[name] = ImageFont.load(file)
-        if use or self._current_font is None:
-            self._current_font = self._fonts[name]
-
-    def set_font(self, fontname):
-        """Set the current font
-
-        :param string fontname: The name of the font to use. This should match the name parameter
-                                used when adding the font.
-        """
-        if self._fonts.get(fontname) is None:
-            raise ValueError("Font name not found.")
-        self._current_font = self._fonts[fontname]
-
-    def set_stroke(self, width, color=None):
-        """Set the text stroke width and color
-
-        :param int width: The stroke width to use. This is how wide the outline of
-                          the text is in pixels.
-        :param color: (optional) The color of the stroke. (default=None)
-        :type color: tuple or list or int
-        """
-        self._stroke_width = width
-        if color is not None:
-            self._stroke_color = self._convert_color(color)
-        else:
-            self._stroke_color = None
-
-    # pylint: disable=no-self-use
-    def _convert_color(self, color):
-        if isinstance(color, (tuple, list)):
-            if len(color) == 3:
-                return (color[0], color[1], color[2], 255)
-            if len(color) == 4:
-                return tuple(color)
-        if isinstance(color, int):
-            return ((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255)
-        raise ValueError("Color should be an integer or 3 or 4 value tuple or list.")
-
-    # pylint: enable=no-self-use
-
-    def _enlarge_canvas(self, width, height):
-        if self._cursor[0] + width >= self._image.width:
-            new_width = self._cursor[0] + width
-        else:
-            new_width = self._image.width
-        if self._cursor[1] + height >= self._image.height:
-            new_height = self._cursor[1] + height
-        else:
-            new_height = self._image.height
-        new_image = Image.new("RGBA", (new_width, new_height))
-        new_image.alpha_composite(self._image)
-        self._image = new_image
-        self._draw = ImageDraw.Draw(self._image)
-
-    def set_color(self, color):
-        """Set the current text color.
-
-        :param color: The color of the text.
-        :type color: tuple or list or int
-        """
-        self._current_color = self._convert_color(color)
-
-    def set_shadow(self, intensity=0.5, offset=1):
-        """Set the canvas to display a shadow of the content. To turn shadow off, set
-        the intensity to 0. The shadow is global for the entire canvas.
-
-        :param float intensity: (optional) The opaquness of the shadow (default=0.5).
-        :param int offset: (optional) The offset in pixels towards the lower right (default=1).
-        """
-        intensity = max(0, min(1.0, intensity))
-        self._shadow_intensity = intensity
-        self._shadow_offset = offset
-
-    # pylint: disable=too-many-arguments
-    def add_text(
-        self,
-        text,
-        color=None,
-        font=None,
-        stroke_width=None,
-        stroke_color=None,
-        x_offset=0,
-        y_offset=0,
-    ):
-        """Add text to the canvas.
-
-        :param string text: The text to add.
-        :param color: (optional) The color of the text to override the current setting.
-                      (default=Current Setting)
-        :param string fontname: (optional) The name of the font to override the current setting.
-                                (default=Current Setting)
-        :param int stroke_width: (optional) The stroke width to override the current setting.
-                                 (default=Current Setting)
-        :param stroke_color: (optional) The color of the stroke to override the current setting.
-                             (default=Current Setting)
-        :param int x_offset: (optional) The amount of x-offset to nudge the text. (default=0)
-        :param int y_offset: (optional) The amount of y-offset to nudge the text. (default=0)
-        :type color: tuple or list or int
-        :type stroke_color: tuple or list or int
-        """
-        if font is not None:
-            font = self._fonts[font]
-        else:
-            font = self._current_font
-        if font is None:
-            font = ImageFont.load_default()
-        x, y = self._cursor
-
-        if color is None:
-            color = self._current_color
-        else:
-            color = self._convert_color(color)
-
-        if stroke_color is None:
-            stroke_color = self._stroke_color
-        else:
-            stroke_color = self._convert_color(stroke_color)
-
-        if stroke_width is None:
-            stroke_width = self._stroke_width
-
-        lines = text.split("\n")
-        for index, line in enumerate(lines):
-            (text_width, text_height) = font.getsize(line, stroke_width=stroke_width)
-            self._enlarge_canvas(text_width, text_height)
-            # Draw the text
-            self._draw.text(
-                (x + x_offset, y + y_offset),
-                line,
-                font=font,
-                fill=color,
-                stroke_width=stroke_width,
-                stroke_fill=stroke_color,
-            )
-            # Get size and add to cursor
-            self._cursor[0] += text_width
-            if index < len(lines) - 1:
-                y += text_height
-                self._cursor[0] = 0
-                self._cursor[1] += text_height
-
-    # pylint: enable=too-many-arguments
-
-    def add_image(self, file):
-        """Add an image to the canvas.
-
-        :param string file: The filename of the image. This should be the full path.
-        """
-        x, y = self._cursor
-        new_image = Image.open(file).convert("RGBA")
-        self._enlarge_canvas(new_image.width, new_image.height)
-        self._image.alpha_composite(new_image, dest=(x, y))
-        self._cursor[0] += new_image.width
-
-    def clear(self):
-        """Clear the canvas content, but retain all of the style settings"""
-        self._image = Image.new("RGBA", (0, 0), (0, 0, 0, 0))
-        self._cursor = [0, 0]
-
-    def get_image(self):
-        """Get the canvas content as an image"""
-        return self._image
-
-    @property
-    def width(self):
-        """Get the current canvas width in pixels"""
-        return self._image.width
-
-    @property
-    def height(self):
-        """Get the current canvas height in pixels"""
-        return self._image.height
-
-    @property
-    def shadow_offset(self):
-        """Get or set the current shadow offset in pixels"""
-        return self._shadow_offset
-
-    @shadow_offset.setter
-    def shadow_offset(self, value):
-        if not isinstance(value, int):
-            raise TypeError("Shadow offset must be an integer")
-        if value < 0:
-            value = 0
-        self._shadow_offset = value
-
-    @property
-    def shadow_intensity(self):
-        """Get or set the current shadow intensity where 0 is
-        no shadow and 1 is a fully opaque shadow."""
-        return self._shadow_intensity
-
-    @shadow_intensity.setter
-    def shadow_intensity(self, value):
-        if not isinstance(value, (int, float)):
-            raise TypeError("Shadow intensity must be an integer or float")
-        value = max(0, min(1.0, value))
-        self._shadow_intensity = value
-
-    @property
-    def opacity(self):
-        """Get or set the maximum opacity of the canvas where 0 is
-        transparent and 1 is opaque."""
-        return self._opacity
-
-    @opacity.setter
-    def opacity(self, value):
-        if not isinstance(value, (int, float)):
-            raise TypeError("Opacity must be an integer or float")
-        value = max(0, min(1.0, value))
-        self._opacity = value
-
-    @property
-    def cursor(self):
-        """Get or set the current cursor position in pixels with the top left
-        being (0, 0)."""
-        return self._cursor
-
-    @cursor.setter
-    def cursor(self, value):
-        if isinstance(value, (tuple, list)) and len(value) >= 2:
-            self._cursor = [value[0], value[1]]
-        else:
-            raise TypeError("Value must be a tuple or list")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from opensign import OpenSign, OpenSignCanvas
-
+from opensign import OpenSign
+from opensign.canvas import OpenSignCanvas
 
 def main():
     message = OpenSignCanvas()

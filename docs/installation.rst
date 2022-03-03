@@ -16,13 +16,13 @@ Start raspi-config::
 
     sudo raspi-config
 
-You can change your password by going to ``Change User Password``, which is recommended for security.
+You can change your password by going to ``System Options`` > ``Password``, which is recommended for security if necessary.
 
-If you haven't already and want to enable WiFi, you can do so now by choosing ``Network Options`` > ``Wireless LAN`` and follow the prompts.
+If you haven't already and want to enable WiFi, you can do so now by choosing ``System Options`` > ``Wireless LAN`` and follow the prompts.
 
 Be sure to set your Timezone by going to ``Localisation Options`` > ``Change Timezone``.
 
-If you would like to change your hostname so that it doesn't conflict with any other Raspberry Pi, you can do so by choosing ``Network Options`` > ``Hostname``.
+If you would like to change your hostname so that it doesn't conflict with any other Raspberry Pi, you can do so by choosing ``System Options`` > ``Hostname``.
 
 After that you can exit the utility.
 
@@ -46,7 +46,7 @@ Additional Fonts
 =================
 Install additional fonts::
 
-    sudo apt install -y ttf-dejavu msttcorefonts fonts-noto
+    sudo apt install -y fonts-dejavu msttcorefonts fonts-noto
 
 
 RGB LED Matrix Python bindings

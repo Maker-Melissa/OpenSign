@@ -4,14 +4,11 @@ from opensign.canvas import OpenSignCanvas
 
 def main():
     message = OpenSignCanvas()
-    message.add_font(
-        "dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14
-    )
-    message.add_text("Hello World!", color=(255, 255, 0))
+    message.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
+    message.set_stroke(1, (255, 255, 255))
+    message.add_text("Hello\nWorld!", color=(0, 255, 0))
 
-    sign = OpenSign(chain=6)
-    sign.set_background_image("background.jpg")
-
+    sign = OpenSign(columns=64, rows=32, slowdown_gpio=2)
     while True:
         sign.scroll_in_from_left(message)
         sign.sleep(1)
