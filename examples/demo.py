@@ -1,7 +1,7 @@
 #!/usr/bin/env python
+import time
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
-import time
 
 
 def main():
