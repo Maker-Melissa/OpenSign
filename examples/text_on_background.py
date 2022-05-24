@@ -3,6 +3,7 @@ from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 import time
 
+
 def main():
     message = OpenSignCanvas()
     message.add_font(
