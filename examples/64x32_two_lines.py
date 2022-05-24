@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
+import time
 
 
 def main():
@@ -12,9 +13,9 @@ def main():
     sign = OpenSign(columns=64, rows=32, slowdown_gpio=2)
     while True:
         sign.scroll_in_from_left(message)
-        sign.sleep(1)
+        time.sleep(1)
         sign.scroll_out_to_right(message)
-        sign.sleep(1)
+        time.sleep(1)
 
 
 # Main function

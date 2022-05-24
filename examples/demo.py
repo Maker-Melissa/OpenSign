@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
+import time
 
 
 def main():
@@ -35,31 +36,31 @@ def main():
 
     while True:
         sign.scroll_in_from_left(message1)
-        sign.sleep(1)
+        time.sleep(1)
         message1.clear()
         message1.add_text("Change Messages")
         sign.show(message1)
-        sign.sleep(1)
+        time.sleep(1)
         message1.clear()
         message1.add_text("And Scroll Out")
         sign.show(message1)
         sign.scroll_out_to_right(message1)
-        sign.sleep(1)
+        time.sleep(1)
 
         sign.join_in_vertically(message1)
         sign.loop_left(message1)
         sign.flash(message1, count=3)
         sign.split_out_vertically(message1)
-        sign.sleep(1)
+        time.sleep(1)
         sign.set_background_color((0, 255, 0))
         sign.fade_in(message2)
-        sign.sleep(1)
+        time.sleep(1)
         sign.fade_out(message2)
         sign.scroll_in_from_top(message3)
-        sign.sleep(1)
+        time.sleep(1)
         sign.scroll_out_to_bottom(message3)
         sign.scroll_in_from_right(message4)
-        sign.sleep(1)
+        time.sleep(1)
 
 
 # Main function
