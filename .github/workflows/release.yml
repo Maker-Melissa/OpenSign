@@ -13,11 +13,11 @@ jobs:
       id: need-pypi
       run: |
         echo ::set-output name=setup-py::$( find . -wholename './setup.py' )
-    - name: Set up Python
+    - name: Set up Python 3.7
       if: contains(steps.need-pypi.outputs.setup-py, 'setup.py')
       uses: actions/setup-python@v1
       with:
-        python-version: '3.x'
+        python-version: '3.7'
     - name: Checkout Henner Zeller RGB LED Matrix Library
       uses: actions/checkout@v2
       with:
