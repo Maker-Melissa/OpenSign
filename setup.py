@@ -29,7 +29,7 @@ setup(
     # Author details
     author="Melissa LeBlanc-Williams",
     author_email="melissa@makermelissa.com",
-    install_requires=["pillow>=7.2.0"],
+    install_requires=["pillow >= 7.2.0, < 10.0.0"],
     # Choose your license
     license="MIT",
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
