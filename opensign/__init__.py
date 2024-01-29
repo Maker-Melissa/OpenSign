@@ -47,6 +47,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/makermelissa/OpenSign.git"
 
+
 # pylint: disable=too-many-public-methods, too-many-lines
 class OpenSign:
     """Main class that controls the sign and graphics effects."""
