@@ -22,7 +22,7 @@ extensions = [
 autodoc_mock_imports = ["rgbmatrix"]
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3.7", None),
+    "python": ("https://docs.python.org/3.12", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -34,7 +34,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "OpenSign Library"
+project = "PyOpenSign Library"
 copyright = "2020 Melissa LeBlanc-Williams"
 author = "Melissa LeBlanc-Williams"
 
@@ -104,7 +104,7 @@ html_static_path = ["_static"]
 html_favicon = ""
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "OpenSignLibrarydoc"
+htmlhelp_basename = "PyOpenSignLibrarydoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -125,8 +125,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "OpenSignLibrary.tex",
-        "OpenSign Library Documentation",
+        "PyOpenSignLibrary.tex",
+        "PyOpenSign Library Documentation",
         author,
         "manual",
     ),
@@ -139,8 +139,8 @@ latex_documents = [
 man_pages = [
     (
         master_doc,
-        "opensignlibrary",
-        "OpenSign Library Documentation",
+        "pyopensignlibrary",
+        "PyOpenSign Library Documentation",
         [author],
         1,
     ),
@@ -154,10 +154,10 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "OpenSignLibrary",
-        "OpenSign Library Documentation",
+        "PyOpenSignLibrary",
+        "PyOpenSign Library Documentation",
         author,
-        "OpenSignLibrary",
+        "PyOpenSignLibrary",
         "One line description of project.",
         "Miscellaneous",
     ),

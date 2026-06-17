@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyopensign"
-description = "A library to facilitate easy RGB Matrix Sign Animations."
+description = "A library to facilitate easy Python RGB Matrix Sign Animations."
 readme = "README.rst"
 authors = [
     {name = "Melissa LeBlanc-Williams", email = "melissa@makermelissa.com"},
