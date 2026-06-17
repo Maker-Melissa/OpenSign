@@ -33,8 +33,8 @@ jobs:
         pip download --no-binary :all: --no-deps pillow -d pillow-src
         mkdir -p pillow-headers
         tar xzf pillow-src/pillow-*.tar.gz -C pillow-headers
-        echo "CPATH=$(dirname $(find $PWD/pillow-headers -name Imaging.h | head -1))" >> "$GITHUB_ENV"
-        pip install git+https://github.com/hzeller/rpi-rgb-led-matrix
+        PILLOW_INC=$(dirname $(find $PWD/pillow-headers -name Imaging.h | head -1))
+        CFLAGS="-I$PILLOW_INC" pip install git+https://github.com/hzeller/rpi-rgb-led-matrix
     - name: Install ruff, reuse, & Sphinx
       run: |
         pip install --force-reinstall ruff reuse Sphinx sphinx-rtd-theme
