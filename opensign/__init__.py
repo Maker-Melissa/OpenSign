@@ -80,6 +80,13 @@ class OpenSign:
         if no_hardware_pulse:
             options.disable_hardware_pulsing = True
 
+        # Eagerly register PIL image-format plugins (JPEG, PNG, etc.) before
+        # RGBMatrix initializes. The matrix library drops root privileges to
+        # `nobody`, after which the venv is unreadable and PIL can no longer
+        # lazy-load its format plugins - causing later Image.open() calls to
+        # raise UnidentifiedImageError.
+        Image.init()
+
         self._matrix = RGBMatrix(options=options)
         self._buffer = self._matrix.CreateFrameCanvas()
         self._background = (0, 0, 0)
