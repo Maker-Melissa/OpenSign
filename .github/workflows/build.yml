@@ -30,6 +30,10 @@ jobs:
     - name: Install RGB Matrix Library Python Bindings
       run: |
         sudo apt-get install -y python3-dev cython3
+        pip download --no-binary :all: --no-deps pillow -d pillow-src
+        mkdir -p pillow-headers
+        tar xzf pillow-src/pillow-*.tar.gz -C pillow-headers
+        echo "CPATH=$(dirname $(find $PWD/pillow-headers -name Imaging.h | head -1))" >> "$GITHUB_ENV"
         pip install git+https://github.com/hzeller/rpi-rgb-led-matrix
     - name: Install ruff, reuse, & Sphinx
       run: |
