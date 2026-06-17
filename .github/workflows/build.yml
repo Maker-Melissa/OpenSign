@@ -27,16 +27,10 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gettext
         pip install -r requirements.txt
-    - name: Checkout Henner Zeller RGB LED Matrix Library
-      uses: actions/checkout@v4
-      with:
-        repository: hzeller/rpi-rgb-led-matrix
-        path: rpi-rgb-led-matrix
-    - name: Compile RGB Matrix Library Python Bindings
-      working-directory: ./rpi-rgb-led-matrix/bindings/python/
+    - name: Install RGB Matrix Library Python Bindings
       run: |
-        make build-python PYTHON=$(which python3)
-        sudo make install-python PYTHON=$(which python3)
+        sudo apt-get install -y python3-dev cython3
+        pip install git+https://github.com/hzeller/rpi-rgb-led-matrix
     - name: Install ruff, reuse, & Sphinx
       run: |
         pip install --force-reinstall ruff reuse Sphinx sphinx-rtd-theme
