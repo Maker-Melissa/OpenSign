@@ -5,13 +5,13 @@ Introduction
     :target: https://opensign.readthedocs.io/en/latest/
     :alt: Documentation Status
 
-.. image:: https://github.com/makermelissa/OpenSign/workflows/Build%20CI/badge.svg
-    :target: https://github.com/makermelissa/OpenSign/actions
+.. image:: https://github.com/Maker-Melissa/OpenSign/workflows/Build%20CI/badge.svg
+    :target: https://github.com/Maker-Melissa/OpenSign/actions
     :alt: Build Status
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/psf/black
-    :alt: Code Style: Black
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+    :target: https://github.com/astral-sh/ruff
+    :alt: Code Style: Ruff
 
 A library to facilitate easy RGB Matrix Sign Animations.
 
