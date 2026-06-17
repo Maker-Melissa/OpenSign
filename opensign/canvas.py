@@ -25,7 +25,7 @@ Implementation Notes
 from PIL import Image, ImageDraw, ImageFont
 
 __version__ = "0.0.0-auto.0"
-__repo__ = "https://github.com/makermelissa/OpenSign.git"
+__repo__ = "https://github.com/Maker-Melissa/PyOpenSign.git"
 
 
 class OpenSignCanvas:

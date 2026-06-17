@@ -52,8 +52,8 @@ Quick Install
 The easiest way to install OpenSign is with the included installer. Clone the
 repository and run it::
 
-    git clone https://github.com/makermelissa/OpenSign
-    cd OpenSign
+    git clone https://github.com/Maker-Melissa/PyOpenSign
+    cd PyOpenSign
     ./install.sh
 
 The installer will:
@@ -100,7 +100,7 @@ Build the Henner Zeller RPi RGB LED Matrix Python Bindings **into the venv**
 
 Install OpenSign into the venv::
 
-    pip3 install opensign
+    pip3 install pyopensign
 
 
 Automatically Start on Boot

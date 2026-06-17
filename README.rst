@@ -1,12 +1,12 @@
 Introduction
 ============
 
-.. image:: https://readthedocs.org/projects/opensign/badge/?version=latest
-    :target: https://opensign.readthedocs.io/en/latest/
+.. image:: https://readthedocs.org/projects/pyopensign/badge/?version=latest
+    :target: https://pyopensign.readthedocs.io/en/latest/
     :alt: Documentation Status
 
-.. image:: https://github.com/Maker-Melissa/OpenSign/workflows/Build%20CI/badge.svg
-    :target: https://github.com/Maker-Melissa/OpenSign/actions
+.. image:: https://github.com/Maker-Melissa/PyOpenSign/workflows/Build%20CI/badge.svg
+    :target: https://github.com/Maker-Melissa/PyOpenSign/actions
     :alt: Build Status
 
 .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
@@ -28,17 +28,17 @@ Installing from PyPI
 =====================
 
 On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
-PyPI <https://pypi.org/project/opensign/>`_. To install for current user:
+PyPI <https://pypi.org/project/pyopensign/>`_. To install for current user:
 
 .. code-block:: shell
 
-    pip3 install opensign
+    pip3 install pyopensign
 
 To install system-wide (this may be required in some cases):
 
 .. code-block:: shell
 
-    sudo pip3 install opensign
+    sudo pip3 install pyopensign
 
 To install in a virtual environment in your current project:
 
@@ -47,4 +47,4 @@ To install in a virtual environment in your current project:
     mkdir project-name && cd project-name
     python3 -m venv .env
     source .env/bin/activate
-    pip3 install opensign
+    pip3 install pyopensign

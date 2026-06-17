@@ -11,13 +11,13 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "opensign"
+name = "pyopensign"
 description = "A library to facilitate easy RGB Matrix Sign Animations."
 readme = "README.rst"
 authors = [
     {name = "Melissa LeBlanc-Williams", email = "melissa@makermelissa.com"},
 ]
-urls = {Homepage = "https://github.com/makermelissa/OpenSign"}
+urls = {Homepage = "https://github.com/Maker-Melissa/PyOpenSign"}
 keywords = [
     "opensign",
     "open",
