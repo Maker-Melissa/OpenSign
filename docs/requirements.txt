@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
+sphinx
+sphinxcontrib-jquery
+sphinx-rtd-theme
