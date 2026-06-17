@@ -11,6 +11,10 @@ on:
 jobs:
   upload-pypi:
     runs-on: ubuntu-latest
+    # Trusted Publishing (OIDC) needs an environment + id-token permission.
+    environment: pypi
+    permissions:
+      id-token: write
     steps:
     - uses: actions/checkout@v4
       with:
@@ -28,12 +32,11 @@ jobs:
       if: contains(steps.need-pypi.outputs.pyproject-toml, 'pyproject.toml')
       run: |
         python -m pip install --upgrade pip
-        pip install build twine
-    - name: Build and publish
+        pip install build
+    - name: Build
       if: contains(steps.need-pypi.outputs.pyproject-toml, 'pyproject.toml')
-      env:
-        TWINE_USERNAME: ${{ secrets.pypi_username }}
-        TWINE_PASSWORD: ${{ secrets.pypi_password }}
       run: |
         python -m build
-        twine upload dist/*
+    - name: Publish to PyPI
+      if: contains(steps.need-pypi.outputs.pyproject-toml, 'pyproject.toml')
+      uses: pypa/gh-action-pypi-publish@release/v1
