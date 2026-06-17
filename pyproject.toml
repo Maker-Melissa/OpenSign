@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "setuptools-scm",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opensign"
+description = "A library to facilitate easy RGB Matrix Sign Animations."
+readme = "README.rst"
+authors = [
+    {name = "Melissa LeBlanc-Williams", email = "melissa@makermelissa.com"},
+]
+urls = {Homepage = "https://github.com/makermelissa/OpenSign"}
+keywords = [
+    "opensign",
+    "open",
+    "sign",
+    "rgb",
+    "matrix",
+    "led",
+    "animation",
+    "hzeller",
+    "makermelissa",
+]
+license = "MIT"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Hardware",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.8"
+dynamic = ["dependencies", "version"]
+
+[tool.setuptools]
+packages = ["opensign"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools_scm]

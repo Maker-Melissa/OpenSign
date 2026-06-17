@@ -35,54 +35,98 @@ Next, you'll want to perform an update with the following commands::
     sudo apt upgrade
 
 
-Install Dependencies
-=====================
-Install Python and other dependencies using this command::
+Configure the RGB Matrix HAT/Bonnet
+===================================
+If you are using an Adafruit RGB Matrix HAT or Bonnet, run Adafruit's matrix
+setup script first. It configures the sound blacklist and CPU isolation the
+matrix library needs for a clean, flicker-free image::
 
-    sudo apt install -y git python3-dev python3-pillow python3-pip libatlas-base-dev libtiff-dev libtiff5-dev libopenjp2-7-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python3-tk libharfbuzz-dev libfribidi-dev libxcb1-dev
+    curl https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/main/rgb-matrix.sh >rgb-matrix.sh
+    sudo bash rgb-matrix.sh
 
-
-Additional Fonts
-=================
-Install additional fonts::
-
-    sudo apt install -y fonts-dejavu msttcorefonts fonts-noto
+Reboot when it asks you to.
 
 
-RGB LED Matrix Python bindings
-===============================
-Install the Henner Zeller RPi RGB LED Matrix Python Bindings::
+Quick Install
+=============
+The easiest way to install OpenSign is with the included installer. Clone the
+repository and run it::
+
+    git clone https://github.com/makermelissa/OpenSign
+    cd OpenSign
+    ./install.sh
+
+The installer will:
+
+* install the required apt packages and fonts,
+* create a Python virtual environment (``~/opensign-venv`` by default),
+* build the Henner Zeller RGB LED Matrix Python bindings into that venv,
+* install OpenSign into the venv, and
+* optionally install a systemd service so the sign starts on boot.
+
+You can override the defaults by exporting variables before running it, for
+example to use a different venv or startup script location::
+
+    OPENSIGN_VENV=/home/pi/myvenv OPENSIGN_SCRIPT=/home/pi/mysign.py ./install.sh
+
+When it finishes, test your sign by running your script with the venv's
+Python::
+
+    sudo ~/opensign-venv/bin/python ~/startup.py
+
+
+Manual Install
+==============
+If you would rather install everything by hand, the steps the installer runs
+are below.
+
+Install the dependencies and fonts::
+
+    sudo apt install -y git python3-dev python3-pip python3-venv libatlas-base-dev libtiff-dev libopenjp2-7-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python3-tk libharfbuzz-dev libfribidi-dev libxcb1-dev
+    sudo apt install -y fonts-dejavu fonts-noto ttf-mscorefonts-installer
+
+Create and activate a virtual environment::
+
+    python3 -m venv ~/opensign-venv
+    source ~/opensign-venv/bin/activate
+
+Build the Henner Zeller RPi RGB LED Matrix Python Bindings **into the venv**
+(activate it first so ``rgbmatrix`` installs alongside OpenSign)::
 
     git clone https://github.com/hzeller/rpi-rgb-led-matrix
     cd rpi-rgb-led-matrix/bindings/python
     make build-python PYTHON=$(which python3)
-    sudo make install-python PYTHON=$(which python3)
+    make install-python PYTHON=$(which python3)
 
-Install OpenSign
-=================
-Install OpenSign via PyPI::
+Install OpenSign into the venv::
 
-    sudo pip3 install opensign
+    pip3 install opensign
 
 
 Automatically Start on Boot
 ============================
-To automatically start a python script on boot, the easiest way is to put it in **/etc/rc.local**
+The installer can set up a systemd service for you. To install (or reinstall)
+it separately, run::
+
+    ./install-service.sh
+
+This installs a service that runs your startup script with the venv's Python
+as root (the matrix library needs root for GPIO). The venv and script paths
+are read from ``/etc/opensign/opensign.conf``::
+
+    OPENSIGN_VENV=/home/pi/opensign-venv
+    OPENSIGN_SCRIPT=/home/pi/startup.py
 
 .. warning::
-    If you are using any images in your script, be sure to use absolute paths because the script is not run from your home folder.
+    If you are using any images in your script, be sure to use absolute paths because the service is not run from your home folder.
 
-.. warning::
-    Verify your script is working before doing this by running it from the command line first. If there are any bugs, it just won't start. You can check the specific errors by running ``systemctl status rc.local.service``.
+Manage the service with the usual ``systemctl`` commands::
 
-Edit the file using::
+    sudo systemctl start opensign      # start now
+    sudo systemctl status opensign     # check status
+    sudo systemctl restart opensign    # restart after editing the config or script
+    journalctl -u opensign -f          # follow the logs
 
-    sudo nano /etc/rc.local
-
-Insert a new line right before ``exit 0``
-
-Assuming your username is pi and your script is in your home directory and called startup.py, the new line should be::
-
-    sudo python3 /home/pi/startup.py &
-
-Save, exit, and reboot. Your sign should come to life.
+After editing ``/etc/opensign/opensign.conf`` (or your startup script), run
+``sudo systemctl restart opensign`` to apply the change. The service is
+enabled on install, so it will come up automatically after a reboot.

@@ -1,5 +1,10 @@
 #!/usr/bin/env python
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
 import time
+
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 

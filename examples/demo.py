@@ -1,5 +1,10 @@
 #!/usr/bin/env python
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
 import time
+
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 
@@ -12,9 +17,7 @@ def main():
     message1.set_shadow()
 
     message2 = OpenSignCanvas()
-    message2.add_font(
-        "comic", "/usr/share/fonts/truetype/msttcorefonts/Comic_Sans_MS.ttf", 14
-    )
+    message2.add_font("comic", "/usr/share/fonts/truetype/msttcorefonts/Comic_Sans_MS.ttf", 14)
     message2.set_stroke(1, (0, 0, 0))
     message2.add_image("logo.png")
     message2.add_text("Maker Melissa's Lab", color=(255, 255, 0), y_offset=-2)

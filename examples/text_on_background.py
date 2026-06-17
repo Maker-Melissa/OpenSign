@@ -1,14 +1,17 @@
 #!/usr/bin/env python
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
 import time
+
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 
 
 def main():
     message = OpenSignCanvas()
-    message.add_font(
-        "dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14
-    )
+    message.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
     message.add_text("Hello World!", color=(255, 255, 0))
 
     sign = OpenSign(chain=6)

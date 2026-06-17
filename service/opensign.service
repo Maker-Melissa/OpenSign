@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
+[Unit]
+Description=OpenSign RGB LED Matrix Sign
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# OPENSIGN_SCRIPT (the script to run) is read from this file. Edit it,
+# then run: sudo systemctl restart opensign
+EnvironmentFile=/etc/opensign/opensign.conf
+# The RGB matrix library needs root for GPIO / realtime scheduling.
+User=root
+# The venv interpreter path is filled in by install-service.sh. systemd
+# requires an absolute executable here, so the venv path is baked in; the
+# script path stays configurable via OPENSIGN_SCRIPT above.
+ExecStart=__VENV_PYTHON__ ${OPENSIGN_SCRIPT}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

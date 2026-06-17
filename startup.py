@@ -1,6 +1,11 @@
 #!/usr/bin/env python
-import time
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
 import copy
+import time
+
 from opensign import OpenSign
 from opensign.canvas import OpenSignCanvas
 
@@ -22,9 +27,7 @@ def duplicate(item_to_duplicate):
 
 def main():
     message1 = OpenSignCanvas()
-    message1.add_font(
-        "comic", "/usr/share/fonts/truetype/msttcorefonts/Comic_Sans_MS.ttf", 14
-    )
+    message1.add_font("comic", "/usr/share/fonts/truetype/msttcorefonts/Comic_Sans_MS.ttf", 14)
     message1.set_stroke(1, (0, 0, 0))
     message1.add_image("/home/pi/logo.png")
     message1.add_text("Maker Melissa's Lab", color=(255, 255, 0), y_offset=-2)

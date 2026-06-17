@@ -1,24 +1,7 @@
-# The MIT License (MIT)
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
 #
-# Copyright (c) 2020 Melissa LeBlanc-Williams
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# SPDX-License-Identifier: MIT
+
 """
 `opensign`
 ================================================================================
@@ -39,8 +22,9 @@ Implementation Notes
 
 """
 
-import time
 import os
+import time
+
 from PIL import Image, ImageChops
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
@@ -116,19 +100,15 @@ class OpenSign:
         return self._matrix.height
 
     # pylint: disable=too-many-arguments, too-many-locals
-    def _add_background(
-        self, image, x, y, opacity=1.0, shadow_intensity=0, shadow_offset=1
-    ):
+    def _add_background(self, image, x, y, opacity=1.0, shadow_intensity=0, shadow_offset=1):
         """Combine the foreground and background images and apply any shadow and opacity effects."""
         if isinstance(self._background, tuple):
             combined_image = Image.new(
                 "RGBA", (self._matrix.width, self._matrix.height), self._background
             )
         else:
-            combined_image = Image.new(
-                "RGBA", (self._matrix.width, self._matrix.height)
-            )
-            combined_image.alpha_composite(Image.open(self._background).convert("RGBA"))
+            combined_image = Image.new("RGBA", (self._matrix.width, self._matrix.height))
+            combined_image.alpha_composite(self._background)
 
         source_x = source_y = 0
         if x < 0:
@@ -145,18 +125,14 @@ class OpenSign:
             "RGBA", (self._matrix.width, self._matrix.height), (0, 0, 0, 0)
         )
         if source_x < image.width and source_y < image.height:
-            foreground_image.alpha_composite(
-                image, dest=(x, y), source=(source_x, source_y)
-            )
+            foreground_image.alpha_composite(image, dest=(x, y), source=(source_x, source_y))
 
         alpha = foreground_image.split()[-1]
 
         if opacity == 1:
             opacity_mask = ImageChops.invert(alpha)
         elif opacity == 0:
-            opacity_mask = Image.new(
-                "L", (self._matrix.width, self._matrix.height), 255
-            )
+            opacity_mask = Image.new("L", (self._matrix.width, self._matrix.height), 255)
         else:
             opacity_filter = Image.new(
                 "L", (self._matrix.width, self._matrix.height), round(opacity * 255)
@@ -172,18 +148,12 @@ class OpenSign:
                 round(shadow_intensity * opacity * 255),
             )
             shadow_mask = ImageChops.darker(alpha, shadow_filter)
-            shadow_shifted = Image.new(
-                "L", (self._matrix.width, self._matrix.height), 0
-            )
+            shadow_shifted = Image.new("L", (self._matrix.width, self._matrix.height), 0)
             shadow_shifted.paste(shadow_mask, box=(shadow_offset, shadow_offset))
             shadow_shifted = ImageChops.invert(shadow_shifted)
-            combined_image = Image.composite(
-                combined_image, shadow_image, shadow_shifted
-            )
+            combined_image = Image.composite(combined_image, shadow_image, shadow_shifted)
 
-        return Image.composite(combined_image, foreground_image, opacity_mask).convert(
-            "RGB"
-        )
+        return Image.composite(combined_image, foreground_image, opacity_mask).convert("RGB")
 
     # pylint: enable=too-many-arguments, too-many-locals
 
@@ -262,12 +232,14 @@ class OpenSign:
     def set_background_image(self, file):
         """Sets the background to an image
 
+        The image is loaded into memory immediately so it remains available
+        even after the matrix library drops root privileges.
+
         :param string file: The file location of the image to display.
         """
-        if os.path.exists(file):
-            self._background = file
-        else:
+        if not os.path.exists(file):
             raise ValueError(f"Specified background file {file} was not found")
+        self._background = Image.open(file).convert("RGBA")
 
     @staticmethod
     def _wait(start_time, duration):
@@ -316,9 +288,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(
-            canvas, duration, 0 - canvas.width, center_y, center_x + x, center_y
-        )
+        self.scroll_from_to(canvas, duration, 0 - canvas.width, center_y, center_x + x, center_y)
 
     def scroll_in_from_right(self, canvas, duration=1, x=0):
         """Scroll a canvas in from the right side of the display over a certain period of
@@ -331,9 +301,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(
-            canvas, duration, self._matrix.width, center_y, center_x + x, center_y
-        )
+        self.scroll_from_to(canvas, duration, self._matrix.width, center_y, center_x + x, center_y)
 
     def scroll_in_from_top(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the top side of the display over a certain period of
@@ -346,9 +314,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(
-            canvas, duration, center_x, 0 - canvas.height, center_x, center_y + y
-        )
+        self.scroll_from_to(canvas, duration, center_x, 0 - canvas.height, center_x, center_y + y)
 
     def scroll_in_from_bottom(self, canvas, duration=1, y=0):
         """Scroll a canvas in from the bottom side of the display over a certain period of
@@ -361,9 +327,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(
-            canvas, duration, center_x, self._matrix.height, center_x, center_y + y
-        )
+        self.scroll_from_to(canvas, duration, center_x, self._matrix.height, center_x, center_y + y)
 
     def scroll_out_to_left(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the left
@@ -375,9 +339,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(
-            canvas, duration, current_x, current_y, 0 - canvas.width, current_y
-        )
+        self.scroll_from_to(canvas, duration, current_x, current_y, 0 - canvas.width, current_y)
 
     def scroll_out_to_right(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the right
@@ -389,9 +351,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(
-            canvas, duration, current_x, current_y, self._matrix.width, current_y
-        )
+        self.scroll_from_to(canvas, duration, current_x, current_y, self._matrix.width, current_y)
 
     def scroll_out_to_top(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the top
@@ -403,9 +363,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(
-            canvas, duration, current_x, current_y, current_x, 0 - canvas.height
-        )
+        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, 0 - canvas.height)
 
     def scroll_out_to_bottom(self, canvas, duration=1):
         """Scroll a canvas off the display from its current position towards the bottom
@@ -417,9 +375,7 @@ class OpenSign:
         :type canvas: OpenSignCanvas
         """
         current_x, current_y = self._position
-        self.scroll_from_to(
-            canvas, duration, current_x, current_y, current_x, self._matrix.height
-        )
+        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, self._matrix.height)
 
     def set_position(self, canvas, x=0, y=0):
         """Instantly move the canvas to a specific location. (0, 0) is the top-left corner.
@@ -537,9 +493,7 @@ class OpenSign:
         current_y = int(self._matrix.height / 2 - canvas.height / 2)
         image = canvas.get_image()
         left_image = image.crop(box=(0, 0, image.width // 2 + 1, image.height))
-        right_image = image.crop(
-            box=(image.width // 2 + 1, 0, image.width, image.height)
-        )
+        right_image = image.crop(box=(image.width // 2 + 1, 0, image.width, image.height))
         distance = self._matrix.width // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
@@ -574,9 +528,7 @@ class OpenSign:
         current_y = int(self._matrix.height / 2 - canvas.height / 2)
         image = canvas.get_image()
         top_image = image.crop(box=(0, 0, image.width, image.height // 2 + 1))
-        bottom_image = image.crop(
-            box=(0, image.height // 2 + 1, image.width, image.height)
-        )
+        bottom_image = image.crop(box=(0, image.height // 2 + 1, image.width, image.height))
         distance = self._matrix.height // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
@@ -610,9 +562,7 @@ class OpenSign:
         current_x, current_y = self._position
         image = canvas.get_image()
         left_image = image.crop(box=(0, 0, image.width // 2 + 1, image.height))
-        right_image = image.crop(
-            box=(image.width // 2 + 1, 0, image.width, image.height)
-        )
+        right_image = image.crop(box=(image.width // 2 + 1, 0, image.width, image.height))
         distance = self._matrix.width // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
@@ -620,9 +570,7 @@ class OpenSign:
                 "RGBA", (self._matrix.width + image.width, image.height), (0, 0, 0, 0)
             )
             effect_image.alpha_composite(left_image, dest=(distance - i, 0))
-            effect_image.alpha_composite(
-                right_image, dest=(distance + image.width // 2 + i + 1, 0)
-            )
+            effect_image.alpha_composite(right_image, dest=(distance + image.width // 2 + i + 1, 0))
             self._draw_image(
                 effect_image,
                 current_x - self._matrix.width // 2,
