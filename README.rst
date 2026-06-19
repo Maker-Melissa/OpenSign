@@ -28,8 +28,12 @@ dispatcher. You can still build reusable messages manually:
     sign = OpenSign(chain=6)
     sign.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
 
-    message = Message(font=sign.fonts.get("dejavu"), opacity=0.8)
-    message.add_text("Hello World!", color="crimson")
+    message = Message(
+        "Hello World!",
+        font=sign.fonts.get("dejavu"),
+        color="crimson",
+        opacity=0.8,
+    )
 
     sign.animate(message, "Scroll", "in_from_left", duration=2)
 
@@ -38,8 +42,8 @@ message:
 
 .. code-block:: python
 
-    sign.scroll_in("Hello World!", from_="right", color="#ffcc00", font="dejavu")
-    sign.wipe_out(to="left")
+    sign.scroll_in("Hello World!", dir_from="right", color="#ffcc00", font="dejavu")
+    sign.wipe_out(dir_to="left")
     sign.fade_in("Hello again", font="dejavu")
     sign.fade_out()
 

@@ -15,9 +15,28 @@ __repo__ = "https://github.com/Maker-Melissa/PyOpenSign.git"
 class Message:
     """A stylable renderable image that can contain text and graphics."""
 
-    def __init__(self, font=None, opacity=1.0):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(
+        self,
+        text=None,
+        *,
+        image=None,
+        font=None,
+        font_file=None,
+        font_size=None,
+        color=(255, 0, 0),
+        opacity=1.0,
+        stroke=None,
+        stroke_width=0,
+        stroke_color=None,
+        shadow=None,
+        shadow_intensity=0,
+        shadow_offset=0,
+        x_offset=0,
+        y_offset=0,
+    ):
         self._fonts = {}
-        self._current_font = font
+        self._current_font = None
         self._current_color = (255, 0, 0, 255)
         self._image = Image.new("RGBA", (0, 0), (0, 0, 0, 0))
         self._draw = ImageDraw.Draw(self._image)
@@ -27,28 +46,32 @@ class Message:
         self._shadow_intensity = 0
         self._shadow_offset = 0
         self._opacity = 1.0
+        if font_file is not None:
+            font = self._load_font(font_file, font_size)
+        self.font = font
+        self.color = color
         self.opacity = opacity
+        self.stroke = stroke if stroke is not None else (stroke_width, stroke_color)
+        self.shadow = shadow if shadow is not None else (shadow_intensity, shadow_offset)
+        if image is not None:
+            self.add_image(image)
+        if text is not None:
+            self.add_text(text, x_offset=x_offset, y_offset=y_offset)
+
+    # pylint: enable=too-many-arguments,too-many-positional-arguments
 
     def add_font(self, name, file, size=None, use=False):
         """Add a font to this message's local font pool."""
-        if size is not None:
-            self._fonts[name] = ImageFont.truetype(file, size)
-        else:
-            self._fonts[name] = ImageFont.load(file)
+        self._fonts[name] = self._load_font(file, size)
         if use or self._current_font is None:
             self._current_font = self._fonts[name]
         return self._fonts[name]
 
-    def set_font(self, fontname):
-        """Set the current font by local font name."""
-        if self._fonts.get(fontname) is None:
-            raise ValueError("Font name not found.")
-        self._current_font = self._fonts[fontname]
-
-    def set_stroke(self, width, color=None):
-        """Set the text stroke width and color."""
-        self._stroke_width = width
-        self._stroke_color = parse_color_alpha(color) if color is not None else None
+    @staticmethod
+    def _load_font(file, size=None):
+        if size is not None:
+            return ImageFont.truetype(file, size)
+        return ImageFont.load(file)
 
     def _convert_color(self, color):
         return parse_color_alpha(color)
@@ -60,15 +83,6 @@ class Message:
         new_image.alpha_composite(self._image)
         self._image = new_image
         self._draw = ImageDraw.Draw(self._image)
-
-    def set_color(self, color):
-        """Set the current text color."""
-        self._current_color = parse_color_alpha(color)
-
-    def set_shadow(self, intensity=0.5, offset=1):
-        """Set the global message shadow."""
-        self.shadow_intensity = intensity
-        self.shadow_offset = offset
 
     # pylint: disable=too-many-arguments
     def add_text(
@@ -149,6 +163,74 @@ class Message:
     def height(self):
         """Get the current message height in pixels."""
         return self._image.height
+
+    @property
+    def font(self):
+        """Get or set the current font."""
+        return self._current_font
+
+    @font.setter
+    def font(self, value):
+        if isinstance(value, str):
+            if self._fonts.get(value) is None:
+                raise ValueError("Font name not found.")
+            value = self._fonts[value]
+        self._current_font = value
+
+    @property
+    def color(self):
+        """Get or set the current text color."""
+        return self._current_color
+
+    @color.setter
+    def color(self, value):
+        self._current_color = parse_color_alpha(value)
+
+    @property
+    def stroke_width(self):
+        """Get or set the current stroke width."""
+        return self._stroke_width
+
+    @stroke_width.setter
+    def stroke_width(self, value):
+        if not isinstance(value, int):
+            raise TypeError("Stroke width must be an integer.")
+        self._stroke_width = max(value, 0)
+
+    @property
+    def stroke_color(self):
+        """Get or set the current stroke color."""
+        return self._stroke_color
+
+    @stroke_color.setter
+    def stroke_color(self, value):
+        self._stroke_color = parse_color_alpha(value) if value is not None else None
+
+    @property
+    def stroke(self):
+        """Get or set the current stroke as ``(width, color)``."""
+        return self._stroke_width, self._stroke_color
+
+    @stroke.setter
+    def stroke(self, value):
+        if isinstance(value, (tuple, list)) and len(value) == 2:
+            self.stroke_width = value[0]
+            self.stroke_color = value[1]
+        else:
+            raise TypeError("Stroke must be a 2-value tuple or list.")
+
+    @property
+    def shadow(self):
+        """Get or set the current shadow as ``(intensity, offset)``."""
+        return self._shadow_intensity, self._shadow_offset
+
+    @shadow.setter
+    def shadow(self, value):
+        if isinstance(value, (tuple, list)) and len(value) == 2:
+            self.shadow_intensity = value[0]
+            self.shadow_offset = value[1]
+        else:
+            raise TypeError("Shadow must be a 2-value tuple or list.")
 
     @property
     def shadow_offset(self):

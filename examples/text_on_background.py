@@ -9,17 +9,20 @@ from opensign import Message, OpenSign
 
 
 def main():
-    message = Message()
-    message.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
-    message.add_text("Hello World!", color=(255, 255, 0))
+    message = Message(
+        "Hello World!",
+        font_file="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        font_size=14,
+        color=(255, 255, 0),
+    )
 
     sign = OpenSign(chain=6)
     sign.set_background_image("background.jpg")
 
     while True:
-        sign.scroll_in(message, from_="left")
+        sign.scroll_in(message, dir_from="left")
         time.sleep(1)
-        sign.scroll_out(to="right")
+        sign.scroll_out(dir_to="right")
         time.sleep(1)
 
 

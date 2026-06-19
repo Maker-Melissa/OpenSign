@@ -131,22 +131,17 @@ class OpenSign:
             if font is None:
                 raise ValueError("Font name not found.")
 
-        message = Message(font=font, opacity=kwargs.get("opacity", 1.0))
-        stroke_width = kwargs.get("stroke_width")
-        if stroke_width is not None:
-            message.set_stroke(stroke_width, kwargs.get("stroke_color"))
-
-        if kwargs.get("shadow_intensity") is not None or kwargs.get("shadow_offset") is not None:
-            message.set_shadow(
-                intensity=kwargs.get("shadow_intensity", 0.5),
-                offset=kwargs.get("shadow_offset", 1),
-            )
-
-        image_path = kwargs.get("image")
-        if image_path is not None:
-            message.add_image(image_path)
-        message.add_text(target, color=kwargs.get("color", (255, 0, 0)))
-
+        message = Message(
+            target,
+            image=kwargs.get("image"),
+            font=font,
+            color=kwargs.get("color", (255, 0, 0)),
+            opacity=kwargs.get("opacity", 1.0),
+            stroke_width=kwargs.get("stroke_width", 0),
+            stroke_color=kwargs.get("stroke_color"),
+            shadow_intensity=kwargs.get("shadow_intensity", 0),
+            shadow_offset=kwargs.get("shadow_offset", 0),
+        )
         self._last_canvas = message
         return message
 
@@ -319,33 +314,33 @@ class OpenSign:
         message = self._resolve_canvas(target, **message_kwargs)
         return dispatch_animation(self, message, class_name, method_name, **kwargs)
 
-    def scroll_in(self, target, from_="left", **kwargs):
+    def scroll_in(self, target, dir_from="left", **kwargs):
         """Scroll a target onto the display."""
-        return self.animate(target, "Scroll", f"in_from_{from_}", **kwargs)
+        return self.animate(target, "Scroll", f"in_from_{dir_from}", **kwargs)
 
-    def scroll_out(self, target=None, to="left", **kwargs):
+    def scroll_out(self, target=None, dir_to="left", **kwargs):
         """Scroll a target off the display."""
-        return self.animate(target, "Scroll", f"out_to_{to}", **kwargs)
+        return self.animate(target, "Scroll", f"out_to_{dir_to}", **kwargs)
 
-    def wipe_in(self, target, from_="left", **kwargs):
+    def wipe_in(self, target, dir_from="left", **kwargs):
         """Wipe a target onto the display."""
-        return self.animate(target, "Wipe", f"in_from_{from_}", **kwargs)
+        return self.animate(target, "Wipe", f"in_from_{dir_from}", **kwargs)
 
-    def wipe_out(self, target=None, to="left", **kwargs):
+    def wipe_out(self, target=None, dir_to="left", **kwargs):
         """Wipe a target off the display."""
-        return self.animate(target, "Wipe", f"out_to_{to}", **kwargs)
+        return self.animate(target, "Wipe", f"out_to_{dir_to}", **kwargs)
 
-    def loop(self, target=None, direction="left", **kwargs):
+    def loop(self, target=None, dir="left", **kwargs):
         """Loop a target across the display."""
-        return self.animate(target, "Loop", direction, **kwargs)
+        return self.animate(target, "Loop", dir, **kwargs)
 
-    def join_in(self, target, direction="horizontally", **kwargs):
+    def join_in(self, target, dir="horizontally", **kwargs):
         """Join split halves of a target onto the display."""
-        return self.animate(target, "Split", f"join_in_{direction}", **kwargs)
+        return self.animate(target, "Split", f"join_in_{dir}", **kwargs)
 
-    def split_out(self, target=None, direction="horizontally", **kwargs):
+    def split_out(self, target=None, dir="horizontally", **kwargs):
         """Split a target off the display."""
-        return self.animate(target, "Split", f"split_out_{direction}", **kwargs)
+        return self.animate(target, "Split", f"split_out_{dir}", **kwargs)
 
     def show(self, target=None, **kwargs):
         """Show a target at the current position."""
