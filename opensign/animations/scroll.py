@@ -6,12 +6,14 @@
 
 import time
 
+from . import Animation
 
-class Scroll:
+
+class Scroll(Animation):
     """Move messages on or off the display."""
 
-    @staticmethod
-    def from_to(sign, message, duration, start_x, start_y, end_x, end_y):
+    def from_to(self, message, duration, start_x, start_y, end_x, end_y):
+        """Scroll the message between two positions."""
         steps = max(abs(end_x - start_x), abs(end_y - start_y))
         if not steps:
             return
@@ -21,46 +23,38 @@ class Scroll:
             start_time = time.monotonic()
             current_x = start_x + round(i * increment_x)
             current_y = start_y + round(i * increment_y)
-            sign._draw(message, current_x, current_y)
+            self.draw(message, current_x, current_y)
             if i <= steps:
-                sign._wait(start_time, duration / steps)
+                self.wait(start_time, duration / steps)
 
-    @staticmethod
-    def in_from_left(sign, message, duration=1, x=0, **_kwargs):
-        center_x, center_y = sign._get_centered_position(message)
-        Scroll.from_to(sign, message, duration, -message.width, center_y, center_x + x, center_y)
+    def in_from_left(self, message, duration=1, x=0, **_kwargs):
+        center_x, center_y = self.centered_position(message)
+        self.from_to(message, duration, -message.width, center_y, center_x + x, center_y)
 
-    @staticmethod
-    def in_from_right(sign, message, duration=1, x=0, **_kwargs):
-        center_x, center_y = sign._get_centered_position(message)
-        Scroll.from_to(sign, message, duration, sign.width, center_y, center_x + x, center_y)
+    def in_from_right(self, message, duration=1, x=0, **_kwargs):
+        center_x, center_y = self.centered_position(message)
+        self.from_to(message, duration, self.width, center_y, center_x + x, center_y)
 
-    @staticmethod
-    def in_from_top(sign, message, duration=1, y=0, **_kwargs):
-        center_x, center_y = sign._get_centered_position(message)
-        Scroll.from_to(sign, message, duration, center_x, -message.height, center_x, center_y + y)
+    def in_from_top(self, message, duration=1, y=0, **_kwargs):
+        center_x, center_y = self.centered_position(message)
+        self.from_to(message, duration, center_x, -message.height, center_x, center_y + y)
 
-    @staticmethod
-    def in_from_bottom(sign, message, duration=1, y=0, **_kwargs):
-        center_x, center_y = sign._get_centered_position(message)
-        Scroll.from_to(sign, message, duration, center_x, sign.height, center_x, center_y + y)
+    def in_from_bottom(self, message, duration=1, y=0, **_kwargs):
+        center_x, center_y = self.centered_position(message)
+        self.from_to(message, duration, center_x, self.height, center_x, center_y + y)
 
-    @staticmethod
-    def out_to_left(sign, message, duration=1, **_kwargs):
-        current_x, current_y = sign._position
-        Scroll.from_to(sign, message, duration, current_x, current_y, -message.width, current_y)
+    def out_to_left(self, message, duration=1, **_kwargs):
+        current_x, current_y = self.position
+        self.from_to(message, duration, current_x, current_y, -message.width, current_y)
 
-    @staticmethod
-    def out_to_right(sign, message, duration=1, **_kwargs):
-        current_x, current_y = sign._position
-        Scroll.from_to(sign, message, duration, current_x, current_y, sign.width, current_y)
+    def out_to_right(self, message, duration=1, **_kwargs):
+        current_x, current_y = self.position
+        self.from_to(message, duration, current_x, current_y, self.width, current_y)
 
-    @staticmethod
-    def out_to_top(sign, message, duration=1, **_kwargs):
-        current_x, current_y = sign._position
-        Scroll.from_to(sign, message, duration, current_x, current_y, current_x, -message.height)
+    def out_to_top(self, message, duration=1, **_kwargs):
+        current_x, current_y = self.position
+        self.from_to(message, duration, current_x, current_y, current_x, -message.height)
 
-    @staticmethod
-    def out_to_bottom(sign, message, duration=1, **_kwargs):
-        current_x, current_y = sign._position
-        Scroll.from_to(sign, message, duration, current_x, current_y, current_x, sign.height)
+    def out_to_bottom(self, message, duration=1, **_kwargs):
+        current_x, current_y = self.position
+        self.from_to(message, duration, current_x, current_y, current_x, self.height)

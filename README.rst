@@ -48,7 +48,6 @@ from its module name, so adding ``opensign/animations/wipe.py`` with a ``Wipe``
 class makes ``sign.animate(message, "Wipe", "method_name")`` available without
 editing a central animation dictionary.
 
-
 Dependencies
 =============
 This library depends on:
@@ -81,3 +80,15 @@ To install in a virtual environment in your current project:
     python3 -m venv .env
     source .env/bin/activate
     pip3 install pyopensign
+
+Running on a Raspberry Pi 4
+============================
+
+On the Raspberry Pi 4, the processor is faster than the GPIOs are able to handle. This results in some "glitchiness" in the animantions.
+To help mitigate this, you can pass the ``slowdown_gpio`` parameter to the OpenSign constructor. This will slow down the GPIO clock to a more manageable speed.
+
+A value of 5 is a good starting point, but you may need to experiment with different values to find the best performance for your specific setup.
+
+The tradeoff is that the animations will be slower, but they will be smoother and more reliable.
+
+Raspberry Pi 5 doesn't have the same issues because of the different GPIO architecture, so you can omit the slowdown_gpio parameter when running on a Raspberry Pi 5.

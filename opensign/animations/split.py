@@ -8,108 +8,98 @@ import time
 
 from PIL import Image
 
+from . import Animation
 
-class Split:
+
+class Split(Animation):
     """Split a message apart or bring split halves together."""
 
-    @staticmethod
-    def join_in_horizontally(sign, message, duration=0.5, **_kwargs):
-        current_x, current_y = sign._get_centered_position(message)
+    def join_in_horizontally(self, message, duration=0.5, **_kwargs):
+        current_x, current_y = self.centered_position(message)
         image = message.get_image()
         left_image = image.crop(box=(0, 0, image.width // 2 + 1, image.height))
         right_image = image.crop(box=(image.width // 2 + 1, 0, image.width, image.height))
-        distance = sign.width // 2
+        distance = self.width // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
-            effect_image = Image.new("RGBA", (sign.width + image.width, image.height), (0, 0, 0, 0))
+            effect_image = Image.new("RGBA", (self.width + image.width, image.height), (0, 0, 0, 0))
             effect_image.alpha_composite(left_image, dest=(i, 0))
             effect_image.alpha_composite(
-                right_image, dest=(sign.width + image.width // 2 - i + 1, 0)
+                right_image, dest=(self.width + image.width // 2 - i + 1, 0)
             )
-            sign._draw_image(
+            self.draw_message_image(
+                message,
                 effect_image,
-                current_x - sign.width // 2,
+                current_x - self.width // 2,
                 current_y,
-                message.opacity,
-                message.shadow_intensity,
-                message.shadow_offset,
             )
-            sign._wait(start_time, duration / distance)
-        sign._position = (current_x, current_y)
+            self.wait(start_time, duration / distance)
+        self.position = (current_x, current_y)
 
-    @staticmethod
-    def join_in_vertically(sign, message, duration=0.5, **_kwargs):
-        current_x, current_y = sign._get_centered_position(message)
+    def join_in_vertically(self, message, duration=0.5, **_kwargs):
+        current_x, current_y = self.centered_position(message)
         image = message.get_image()
         top_image = image.crop(box=(0, 0, image.width, image.height // 2 + 1))
         bottom_image = image.crop(box=(0, image.height // 2 + 1, image.width, image.height))
-        distance = sign.height // 2
+        distance = self.height // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
             effect_image = Image.new(
-                "RGBA", (image.width, sign.height + image.height), (0, 0, 0, 0)
+                "RGBA", (image.width, self.height + image.height), (0, 0, 0, 0)
             )
             effect_image.alpha_composite(top_image, dest=(0, i))
             effect_image.alpha_composite(
-                bottom_image, dest=(0, sign.height + image.height // 2 - i + 1)
+                bottom_image, dest=(0, self.height + image.height // 2 - i + 1)
             )
-            sign._draw_image(
+            self.draw_message_image(
+                message,
                 effect_image,
                 current_x,
-                current_y - sign.height // 2,
-                message.opacity,
-                message.shadow_intensity,
-                message.shadow_offset,
+                current_y - self.height // 2,
             )
-            sign._wait(start_time, duration / distance)
-        sign._position = (current_x, current_y)
+            self.wait(start_time, duration / distance)
+        self.position = (current_x, current_y)
 
-    @staticmethod
-    def split_out_horizontally(sign, message, duration=0.5, **_kwargs):
-        current_x, current_y = sign._position
+    def split_out_horizontally(self, message, duration=0.5, **_kwargs):
+        current_x, current_y = self.position
         image = message.get_image()
         left_image = image.crop(box=(0, 0, image.width // 2 + 1, image.height))
         right_image = image.crop(box=(image.width // 2 + 1, 0, image.width, image.height))
-        distance = sign.width // 2
+        distance = self.width // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
-            effect_image = Image.new("RGBA", (sign.width + image.width, image.height), (0, 0, 0, 0))
+            effect_image = Image.new("RGBA", (self.width + image.width, image.height), (0, 0, 0, 0))
             effect_image.alpha_composite(left_image, dest=(distance - i, 0))
             effect_image.alpha_composite(right_image, dest=(distance + image.width // 2 + i + 1, 0))
-            sign._draw_image(
+            self.draw_message_image(
+                message,
                 effect_image,
-                current_x - sign.width // 2,
+                current_x - self.width // 2,
                 current_y,
-                message.opacity,
-                message.shadow_intensity,
-                message.shadow_offset,
             )
-            sign._wait(start_time, duration / distance)
-        sign._position = (current_x - sign.width // 2, current_y)
+            self.wait(start_time, duration / distance)
+        self.position = (current_x - self.width // 2, current_y)
 
-    @staticmethod
-    def split_out_vertically(sign, message, duration=0.5, **_kwargs):
-        current_x, current_y = sign._position
+    def split_out_vertically(self, message, duration=0.5, **_kwargs):
+        current_x, current_y = self.position
         image = message.get_image()
         top_image = image.crop(box=(0, 0, image.width, image.height // 2))
         bottom_image = image.crop(box=(0, image.height // 2, image.width, image.height))
-        distance = sign.height // 2
+        distance = self.height // 2
         for i in range(distance + 1):
             start_time = time.monotonic()
             effect_image = Image.new(
-                "RGBA", (image.width, sign.height + image.height), (0, 0, 0, 0)
+                "RGBA", (image.width, self.height + image.height), (0, 0, 0, 0)
             )
             effect_image.alpha_composite(top_image, dest=(0, distance - i))
             effect_image.alpha_composite(
                 bottom_image, dest=(0, distance + image.height // 2 + i + 1)
             )
-            sign._draw_image(
+            self.draw_message_image(
+                message,
                 effect_image,
                 current_x,
-                current_y - sign.height // 2,
-                message.opacity,
-                message.shadow_intensity,
-                message.shadow_offset,
+                current_y - self.height // 2,
             )
-            sign._wait(start_time, duration / distance)
-        sign._position = (current_x, current_y - sign.height // 2)
+            self.wait(start_time, duration / distance)
+        self.position = (current_x, current_y - self.height // 2)

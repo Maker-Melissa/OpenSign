@@ -6,30 +6,30 @@
 
 import time
 
+from . import Animation
 
-class Fade:
+
+class Fade(Animation):
     """Fade messages in or out as a whole."""
 
-    @staticmethod
-    def in_(sign, message, duration=1, steps=50, **_kwargs):
+    def in_(self, message, duration=1, steps=50, **_kwargs):
         """Fade the message in."""
-        current_x, current_y = sign._get_centered_position(message)
+        current_x, current_y = self.centered_position(message)
         delay = duration / (steps + 1)
         for opacity in range(steps + 1):
             start_time = time.monotonic()
-            sign._draw(message, current_x, current_y, opacity=opacity / steps)
-            sign._wait(start_time, delay)
+            self.draw(message, current_x, current_y, opacity=opacity / steps)
+            self.wait(start_time, delay)
 
-    @staticmethod
-    def out(sign, message, duration=1, steps=50, **_kwargs):
+    def out(self, message, duration=1, steps=50, **_kwargs):
         """Fade the message out."""
         delay = duration / (steps + 1)
         for opacity in range(steps + 1):
             start_time = time.monotonic()
-            sign._draw(
+            self.draw(
                 message,
-                sign._position[0],
-                sign._position[1],
+                self.position[0],
+                self.position[1],
                 opacity=(steps - opacity) / steps,
             )
-            sign._wait(start_time, delay)
+            self.wait(start_time, delay)

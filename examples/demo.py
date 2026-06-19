@@ -9,7 +9,7 @@ from opensign import Message, OpenSign
 
 
 def main():
-    sign = OpenSign(chain=6)
+    sign = OpenSign(chain=6, slowdown_gpio=5)
     sign.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
     sign.add_font("comic", "/usr/share/fonts/truetype/msttcorefonts/Comic_Sans_MS.ttf", 14)
     sign.set_background_image("background.jpg")
@@ -37,10 +37,12 @@ def main():
     while True:
         sign.scroll_in(message1, from_="left")
         time.sleep(1)
+
         message1.clear()
         message1.add_text("Change Messages")
         sign.show(message1)
         time.sleep(1)
+
         message1.clear()
         message1.add_text("And Scroll Out")
         sign.show(message1)
@@ -52,12 +54,15 @@ def main():
         sign.flash(message1, count=3)
         sign.split_out(direction="vertically")
         time.sleep(1)
+
         sign.set_background_color((0, 255, 0))
         sign.fade_in(message2)
         time.sleep(1)
+
         sign.fade_out()
         sign.scroll_in(message3, from_="top")
         time.sleep(1)
+
         sign.scroll_out(to="bottom")
         sign.scroll_in(message4, from_="right")
         sign.wipe_out(to="left")

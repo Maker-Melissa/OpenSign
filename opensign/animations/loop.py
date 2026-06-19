@@ -6,90 +6,60 @@
 
 import time
 
+from . import Animation
 
-class Loop:
+
+class Loop(Animation):
     """Loop messages across the display."""
 
-    @staticmethod
-    def left(sign, message, duration=1, count=1, **_kwargs):
-        current_x, current_y = sign._position
-        distance = max(message.width, sign.width)
-        loop_image = sign._create_loop_image(message.get_image(), distance, 0)
+    def left(self, message, duration=1, count=1, **_kwargs):
+        current_x, current_y = self.position
+        distance = max(message.width, self.width)
+        loop_image = self.create_loop_image(message.get_image(), distance, 0)
         for _ in range(count):
             for _ in range(distance):
                 start_time = time.monotonic()
                 current_x -= 1
                 if current_x < -message.width:
                     current_x += distance
-                sign._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    message.opacity,
-                    message.shadow_intensity,
-                    message.shadow_offset,
-                )
-                sign._wait(start_time, duration / distance / count)
+                self.draw_message_image(message, loop_image, current_x, current_y)
+                self.wait(start_time, duration / distance / count)
 
-    @staticmethod
-    def right(sign, message, duration=1, count=1, **_kwargs):
-        current_x, current_y = sign._position
-        distance = max(message.width, sign.width)
-        loop_image = sign._create_loop_image(message.get_image(), distance, 0)
+    def right(self, message, duration=1, count=1, **_kwargs):
+        current_x, current_y = self.position
+        distance = max(message.width, self.width)
+        loop_image = self.create_loop_image(message.get_image(), distance, 0)
         for _ in range(count):
             for _ in range(distance):
                 start_time = time.monotonic()
                 current_x += 1
                 if current_x > 0:
                     current_x -= distance
-                sign._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    message.opacity,
-                    message.shadow_intensity,
-                    message.shadow_offset,
-                )
-                sign._wait(start_time, duration / distance / count)
+                self.draw_message_image(message, loop_image, current_x, current_y)
+                self.wait(start_time, duration / distance / count)
 
-    @staticmethod
-    def up(sign, message, duration=0.5, count=1, **_kwargs):
-        current_x, current_y = sign._position
-        distance = max(message.height, sign.height)
-        loop_image = sign._create_loop_image(message.get_image(), 0, distance)
+    def up(self, message, duration=0.5, count=1, **_kwargs):
+        current_x, current_y = self.position
+        distance = max(message.height, self.height)
+        loop_image = self.create_loop_image(message.get_image(), 0, distance)
         for _ in range(count):
             for _ in range(distance):
                 start_time = time.monotonic()
                 current_y -= 1
                 if current_y < -message.height:
                     current_y += distance
-                sign._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    message.opacity,
-                    message.shadow_intensity,
-                    message.shadow_offset,
-                )
-                sign._wait(start_time, duration / distance / count)
+                self.draw_message_image(message, loop_image, current_x, current_y)
+                self.wait(start_time, duration / distance / count)
 
-    @staticmethod
-    def down(sign, message, duration=0.5, count=1, **_kwargs):
-        current_x, current_y = sign._position
-        distance = max(message.height, sign.height)
-        loop_image = sign._create_loop_image(message.get_image(), 0, distance)
+    def down(self, message, duration=0.5, count=1, **_kwargs):
+        current_x, current_y = self.position
+        distance = max(message.height, self.height)
+        loop_image = self.create_loop_image(message.get_image(), 0, distance)
         for _ in range(count):
             for _ in range(distance):
                 start_time = time.monotonic()
                 current_y += 1
                 if current_y > 0:
                     current_y -= distance
-                sign._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    message.opacity,
-                    message.shadow_intensity,
-                    message.shadow_offset,
-                )
-                sign._wait(start_time, duration / distance / count)
+                self.draw_message_image(message, loop_image, current_x, current_y)
+                self.wait(start_time, duration / distance / count)
