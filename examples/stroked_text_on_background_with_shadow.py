@@ -5,12 +5,11 @@
 
 import time
 
-from opensign import OpenSign
-from opensign.canvas import OpenSignCanvas
+from opensign import Message, OpenSign
 
 
 def main():
-    message = OpenSignCanvas()
+    message = Message()
     message.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
     message.set_stroke(1, (0, 0, 0))
     message.add_text("Hello World!", color=(255, 255, 0))
@@ -20,9 +19,9 @@ def main():
     sign.set_background_image("background.jpg")
 
     while True:
-        sign.scroll_in_from_left(message)
+        sign.scroll_in(message, from_="left")
         time.sleep(1)
-        sign.scroll_out_to_right(message)
+        sign.scroll_out(to="right")
         time.sleep(1)
 
 

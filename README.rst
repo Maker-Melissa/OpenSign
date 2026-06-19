@@ -15,6 +15,37 @@ Introduction
 
 A library to facilitate easy RGB Matrix Sign Animations.
 
+Simple v2 API
+=============
+
+PyOpenSign 2.0 centers around ``Message`` objects and a single animation
+dispatcher. You can still build reusable messages manually:
+
+.. code-block:: python
+
+    from opensign import Message, OpenSign
+
+    sign = OpenSign(chain=6)
+    sign.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
+
+    message = Message(font=sign.fonts.get("dejavu"), opacity=0.8)
+    message.add_text("Hello World!", color="crimson")
+
+    sign.animate(message, "Scroll", "in_from_left", duration=2)
+
+For quick scripts, pass text directly and let PyOpenSign create the temporary
+message:
+
+.. code-block:: python
+
+    sign.scroll_in("Hello World!", from_="right", color="#ffcc00", font="dejavu")
+    sign.fade_out()
+
+Animation plugins live in ``opensign/animations``. Each plugin is discovered
+from its module name, so adding ``opensign/animations/wipe.py`` with a ``Wipe``
+class makes ``sign.animate(message, "Wipe", "method_name")`` available without
+editing a central animation dictionary.
+
 
 Dependencies
 =============

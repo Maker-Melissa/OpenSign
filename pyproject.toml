@@ -46,7 +46,7 @@ requires-python = ">=3.8"
 dynamic = ["dependencies", "version"]
 
 [tool.setuptools]
-packages = ["opensign"]
+packages = ["opensign", "opensign.animations"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}

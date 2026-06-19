@@ -28,6 +28,11 @@ import time
 from PIL import Image, ImageChops
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
+from .animations import animate as dispatch_animation
+from .colors import parse_color
+from .fontpool import FontPool
+from .message import Message
+
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/Maker-Melissa/PyOpenSign.git"
 
@@ -91,7 +96,59 @@ class OpenSign:
         self._buffer = self._matrix.CreateFrameCanvas()
         self._background = (0, 0, 0)
         self._position = (0, 0)
+        self.fonts = FontPool()
+        self._last_canvas = None
         # pylint: enable=too-many-locals
+
+    def add_font(self, name, file, size=None):
+        """Add a font to the shared font pool.
+
+        Fonts registered here are available to any canvas created via this sign.
+
+        :param string name: A unique name key for looking up this font later.
+        :param string file: Path to the font file (TrueType or bitmap).
+        :param int size: (optional) Font size for TrueType fonts. Omit for bitmap fonts.
+        """
+        return self.fonts.add_font(name, file, size)
+
+    def _resolve_canvas(self, target, **kwargs):
+        """Return a Message for a renderable target or text string."""
+        if isinstance(target, Message):
+            self._last_canvas = target
+            return target
+
+        if target is None:
+            if self._last_canvas is None:
+                raise ValueError("No message has been created yet.")
+            return self._last_canvas
+
+        if not isinstance(target, str):
+            raise TypeError("Target must be a Message, string, or None.")
+
+        font = kwargs.get("font")
+        if isinstance(font, str):
+            font = self.fonts.get(font)
+            if font is None:
+                raise ValueError("Font name not found.")
+
+        message = Message(font=font, opacity=kwargs.get("opacity", 1.0))
+        stroke_width = kwargs.get("stroke_width")
+        if stroke_width is not None:
+            message.set_stroke(stroke_width, kwargs.get("stroke_color"))
+
+        if kwargs.get("shadow_intensity") is not None or kwargs.get("shadow_offset") is not None:
+            message.set_shadow(
+                intensity=kwargs.get("shadow_intensity", 0.5),
+                offset=kwargs.get("shadow_offset", 1),
+            )
+
+        image_path = kwargs.get("image")
+        if image_path is not None:
+            message.add_image(image_path)
+        message.add_text(target, color=kwargs.get("color", (255, 0, 0)))
+
+        self._last_canvas = message
+        return message
 
     def _update(self):
         self._buffer = self._matrix.SwapOnVSync(self._buffer)
@@ -229,12 +286,7 @@ class OpenSign:
         :param color: The time to sleep in seconds.
         :type color: tuple or list or int
         """
-        if isinstance(color, (tuple, list)) and len(color) == 3:
-            self._background = tuple(color)
-        elif isinstance(color, int):
-            self._background = ((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)
-        else:
-            raise ValueError("Color should be an integer or 3 value tuple or list.")
+        self._background = parse_color(color)
 
     def set_background_image(self, file):
         """Sets the background to an image
@@ -248,497 +300,72 @@ class OpenSign:
             raise ValueError(f"Specified background file {file} was not found")
         self._background = Image.open(file).convert("RGBA")
 
+    def animate(self, target, class_name, method_name, **kwargs):
+        """Animate a Message or text string."""
+        message_kwargs = {
+            key: kwargs.pop(key)
+            for key in (
+                "font",
+                "color",
+                "stroke_width",
+                "stroke_color",
+                "shadow_intensity",
+                "shadow_offset",
+                "opacity",
+                "image",
+            )
+            if key in kwargs
+        }
+        message = self._resolve_canvas(target, **message_kwargs)
+        return dispatch_animation(self, message, class_name, method_name, **kwargs)
+
+    def scroll_in(self, target, from_="left", **kwargs):
+        """Scroll a target onto the display."""
+        return self.animate(target, "Scroll", f"in_from_{from_}", **kwargs)
+
+    def scroll_out(self, target=None, to="left", **kwargs):
+        """Scroll a target off the display."""
+        return self.animate(target, "Scroll", f"out_to_{to}", **kwargs)
+
+    def loop(self, target=None, direction="left", **kwargs):
+        """Loop a target across the display."""
+        return self.animate(target, "Loop", direction, **kwargs)
+
+    def join_in(self, target, direction="horizontally", **kwargs):
+        """Join split halves of a target onto the display."""
+        return self.animate(target, "Split", f"join_in_{direction}", **kwargs)
+
+    def split_out(self, target=None, direction="horizontally", **kwargs):
+        """Split a target off the display."""
+        return self.animate(target, "Split", f"split_out_{direction}", **kwargs)
+
+    def show(self, target=None, **kwargs):
+        """Show a target at the current position."""
+        return self.animate(target, "Static", "show", **kwargs)
+
+    def hide(self, target=None, **kwargs):
+        """Hide the current target."""
+        return self.animate(target, "Static", "hide", **kwargs)
+
+    def blink(self, target=None, count=3, duration=1, **kwargs):
+        """Blink a target on and off."""
+        return self.animate(target, "Static", "blink", count=count, duration=duration, **kwargs)
+
+    def flash(self, target=None, count=3, duration=1, **kwargs):
+        """Fade a target in and out."""
+        return self.animate(target, "Static", "flash", count=count, duration=duration, **kwargs)
+
+    def fade_in(self, target=None, duration=1, steps=50, **kwargs):
+        """Fade a target in."""
+        return self.animate(target, "Static", "fade_in", duration=duration, steps=steps, **kwargs)
+
+    def fade_out(self, target=None, duration=1, steps=50, **kwargs):
+        """Fade a target out."""
+        return self.animate(target, "Static", "fade_out", duration=duration, steps=steps, **kwargs)
+
     @staticmethod
     def _wait(start_time, duration):
         """Uses time.monotonic() to wait from the start time for a specified duration"""
         while time.monotonic() < (start_time + duration):
             pass
         return time.monotonic()
-
-    # pylint: disable=too-many-arguments
-    def scroll_from_to(self, canvas, duration, start_x, start_y, end_x, end_y):
-        """
-        Scroll the canvas from one position to another over a certain period of
-        time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: The period of time to perform the animation over in seconds.
-        :param int start_x: The Starting X Position
-        :param int start_yx: The Starting Y Position
-        :param int end_x: The Ending X Position
-        :param int end_y: The Ending Y Position
-        :type canvas: OpenSignCanvas
-        """
-        steps = max(abs(end_x - start_x), abs(end_y - start_y))
-        if not steps:
-            return
-        increment_x = (end_x - start_x) / steps
-        increment_y = (end_y - start_y) / steps
-        for i in range(steps + 1):
-            start_time = time.monotonic()
-            current_x = start_x + round(i * increment_x)
-            current_y = start_y + round(i * increment_y)
-            self._draw(canvas, current_x, current_y)
-            if i <= steps:
-                self._wait(start_time, duration / steps)
-
-    # pylint: enable=too-many-arguments
-
-    def scroll_in_from_left(self, canvas, duration=1, x=0):
-        """Scroll a canvas in from the left side of the display over a certain period of
-        time. The final position is centered.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :param int x: (optional) The amount of x-offset from the center position (default=0)
-        :type canvas: OpenSignCanvas
-        """
-        center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, 0 - canvas.width, center_y, center_x + x, center_y)
-
-    def scroll_in_from_right(self, canvas, duration=1, x=0):
-        """Scroll a canvas in from the right side of the display over a certain period of
-        time. The final position is centered.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :param int x: (optional) The amount of x-offset from the center position (default=0)
-        :type canvas: OpenSignCanvas
-        """
-        center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, self._matrix.width, center_y, center_x + x, center_y)
-
-    def scroll_in_from_top(self, canvas, duration=1, y=0):
-        """Scroll a canvas in from the top side of the display over a certain period of
-        time. The final position is centered.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :param int y: (optional) The amount of y-offset from the center position (default=0)
-        :type canvas: OpenSignCanvas
-        """
-        center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, center_x, 0 - canvas.height, center_x, center_y + y)
-
-    def scroll_in_from_bottom(self, canvas, duration=1, y=0):
-        """Scroll a canvas in from the bottom side of the display over a certain period of
-        time. The final position is centered.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :param int y: (optional) The amount of y-offset from the center position (default=0)
-        :type canvas: OpenSignCanvas
-        """
-        center_x, center_y = self._get_centered_position(canvas)
-        self.scroll_from_to(canvas, duration, center_x, self._matrix.height, center_x, center_y + y)
-
-    def scroll_out_to_left(self, canvas, duration=1):
-        """Scroll a canvas off the display from its current position towards the left
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, 0 - canvas.width, current_y)
-
-    def scroll_out_to_right(self, canvas, duration=1):
-        """Scroll a canvas off the display from its current position towards the right
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, self._matrix.width, current_y)
-
-    def scroll_out_to_top(self, canvas, duration=1):
-        """Scroll a canvas off the display from its current position towards the top
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, 0 - canvas.height)
-
-    def scroll_out_to_bottom(self, canvas, duration=1):
-        """Scroll a canvas off the display from its current position towards the bottom
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over in seconds. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        self.scroll_from_to(canvas, duration, current_x, current_y, current_x, self._matrix.height)
-
-    def set_position(self, canvas, x=0, y=0):
-        """Instantly move the canvas to a specific location. (0, 0) is the top-left corner.
-
-        :param canvas: The canvas to move.
-        :param int x: (optional) The x-position to move the canvas to. (default=0)
-        :param int y: (optional) The y-position to move the canvas to. (default=0)
-        :type canvas: OpenSignCanvas
-        """
-        self._draw(canvas, x, y)
-
-    def show(self, canvas):
-        """Show the canvas at its current position.
-
-        :param canvas: The canvas to show.
-        :type canvas: OpenSignCanvas
-        """
-        x, y = self._position
-        self._draw(canvas, x, y)
-
-    def hide(self, canvas):
-        """Hide the canvas at its current position.
-
-        :param canvas: The canvas to hide.
-        :type canvas: OpenSignCanvas
-        """
-        x, y = self._position
-        self._draw(canvas, x, y, opacity=0)
-
-    def blink(self, canvas, count=3, duration=1):
-        """Blink the foreground on and off a centain number of
-        times over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float count: (optional) The number of times to blink. (default=3)
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        delay = duration / count / 2
-        for _ in range(count):
-            start_time = time.monotonic()
-            self.hide(canvas)
-            start_time = self._wait(start_time, delay)
-            self.show(canvas)
-            self._wait(start_time, delay)
-
-    def flash(self, canvas, count=3, duration=1):
-        """Fade the foreground in and out a centain number of
-        times over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float count: (optional) The number of times to flash. (default=3)
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        delay = duration / count / 2
-        steps = 50 // count
-        for _ in range(count):
-            self.fade_out(canvas, duration=delay, steps=steps)
-            self.fade_in(canvas, duration=delay, steps=steps)
-
-    def fade_in(self, canvas, duration=1, steps=50):
-        """Fade the foreground in over a certain period of time
-        by a certain number of steps. More steps is smoother, but too high
-        of a number may slow down the animation too much.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :param float steps: (optional) The number of steps to perform the animation. (default=50)
-        :type canvas: OpenSignCanvas
-        """
-        current_x = int(self._matrix.width / 2 - canvas.width / 2)
-        current_y = int(self._matrix.height / 2 - canvas.height / 2)
-        delay = duration / (steps + 1)
-        for opacity in range(steps + 1):
-            start_time = time.monotonic()
-            self._draw(canvas, current_x, current_y, opacity=opacity / steps)
-            self._wait(start_time, delay)
-
-    def fade_out(self, canvas, duration=1, steps=50):
-        """Fade the foreground out over a certain period of time
-        by a certain number of steps. More steps is smoother, but too high
-        of a number may slow down the animation too much.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :param float steps: (optional) The number of steps to perform the animation. (default=50)
-        :type canvas: OpenSignCanvas
-        """
-        delay = duration / (steps + 1)
-        for opacity in range(steps + 1):
-            start_time = time.monotonic()
-            self._draw(
-                canvas,
-                self._position[0],
-                self._position[1],
-                opacity=(steps - opacity) / steps,
-            )
-            self._wait(start_time, delay)
-
-    def join_in_horizontally(self, canvas, duration=0.5):
-        """Show the effect of a split canvas joining horizontally
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=0.5)
-        :type canvas: OpenSignCanvas
-        """
-        current_x = int(self._matrix.width / 2 - canvas.width / 2)
-        current_y = int(self._matrix.height / 2 - canvas.height / 2)
-        image = canvas.get_image()
-        left_image = image.crop(box=(0, 0, image.width // 2 + 1, image.height))
-        right_image = image.crop(box=(image.width // 2 + 1, 0, image.width, image.height))
-        distance = self._matrix.width // 2
-        for i in range(distance + 1):
-            start_time = time.monotonic()
-            effect_image = Image.new(
-                "RGBA", (self._matrix.width + image.width, image.height), (0, 0, 0, 0)
-            )
-            effect_image.alpha_composite(left_image, dest=(i, 0))
-            effect_image.alpha_composite(
-                right_image, dest=(self._matrix.width + image.width // 2 - i + 1, 0)
-            )
-            self._draw_image(
-                effect_image,
-                current_x - self._matrix.width // 2,
-                current_y,
-                canvas.opacity,
-                canvas.shadow_intensity,
-                canvas.shadow_offset,
-            )
-            self._wait(start_time, duration / distance)
-        self._position = (current_x, current_y)
-
-    def join_in_vertically(self, canvas, duration=0.5):
-        """Show the effect of a split canvas joining vertically
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=0.5)
-        :type canvas: OpenSignCanvas
-        """
-        current_x = int(self._matrix.width / 2 - canvas.width / 2)
-        current_y = int(self._matrix.height / 2 - canvas.height / 2)
-        image = canvas.get_image()
-        top_image = image.crop(box=(0, 0, image.width, image.height // 2 + 1))
-        bottom_image = image.crop(box=(0, image.height // 2 + 1, image.width, image.height))
-        distance = self._matrix.height // 2
-        for i in range(distance + 1):
-            start_time = time.monotonic()
-            effect_image = Image.new(
-                "RGBA", (image.width, self._matrix.height + image.height), (0, 0, 0, 0)
-            )
-            effect_image.alpha_composite(top_image, dest=(0, i))
-            effect_image.alpha_composite(
-                bottom_image, dest=(0, self._matrix.height + image.height // 2 - i + 1)
-            )
-            self._draw_image(
-                effect_image,
-                current_x,
-                current_y - self._matrix.height // 2,
-                canvas.opacity,
-                canvas.shadow_intensity,
-                canvas.shadow_offset,
-            )
-            self._wait(start_time, duration / distance)
-        self._position = (current_x, current_y)
-
-    def split_out_horizontally(self, canvas, duration=0.5):
-        """Show the effect of a canvas splitting horizontally
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=0.5)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        image = canvas.get_image()
-        left_image = image.crop(box=(0, 0, image.width // 2 + 1, image.height))
-        right_image = image.crop(box=(image.width // 2 + 1, 0, image.width, image.height))
-        distance = self._matrix.width // 2
-        for i in range(distance + 1):
-            start_time = time.monotonic()
-            effect_image = Image.new(
-                "RGBA", (self._matrix.width + image.width, image.height), (0, 0, 0, 0)
-            )
-            effect_image.alpha_composite(left_image, dest=(distance - i, 0))
-            effect_image.alpha_composite(right_image, dest=(distance + image.width // 2 + i + 1, 0))
-            self._draw_image(
-                effect_image,
-                current_x - self._matrix.width // 2,
-                current_y,
-                canvas.opacity,
-                canvas.shadow_intensity,
-                canvas.shadow_offset,
-            )
-            self._wait(start_time, duration / distance)
-        self._position = (current_x - self._matrix.width // 2, current_y)
-
-    def split_out_vertically(self, canvas, duration=0.5):
-        """Show the effect of a canvas splitting vertically
-        over a certain period of time.
-
-        :param canvas: The canvas to animate.
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=0.5)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        image = canvas.get_image()
-        top_image = image.crop(box=(0, 0, image.width, image.height // 2))
-        bottom_image = image.crop(box=(0, image.height // 2, image.width, image.height))
-        distance = self._matrix.height // 2
-        for i in range(distance + 1):
-            start_time = time.monotonic()
-            effect_image = Image.new(
-                "RGBA", (image.width, self._matrix.height + image.height), (0, 0, 0, 0)
-            )
-            effect_image.alpha_composite(top_image, dest=(0, distance - i))
-            effect_image.alpha_composite(
-                bottom_image, dest=(0, distance + image.height // 2 + i + 1)
-            )
-            self._draw_image(
-                effect_image,
-                current_x,
-                current_y - self._matrix.height // 2,
-                canvas.opacity,
-                canvas.shadow_intensity,
-                canvas.shadow_offset,
-            )
-            self._wait(start_time, duration / distance)
-        self._position = (current_x, current_y - self._matrix.height // 2)
-
-    def loop_left(self, canvas, duration=1, count=1):
-        """Loop a canvas towards the left side of the display over a certain period of time by a
-        certain number of times. The canvas will re-enter from the right and end up back a the
-        starting position.
-
-        :param canvas: The canvas to animate.
-        :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        distance = max(canvas.width, self._matrix.width)
-        loop_image = self._create_loop_image(canvas.get_image(), distance, 0)
-        for _ in range(count):
-            for _ in range(distance):
-                start_time = time.monotonic()
-                current_x -= 1
-                if current_x < 0 - canvas.width:
-                    current_x += distance
-                self._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    canvas.opacity,
-                    canvas.shadow_intensity,
-                    canvas.shadow_offset,
-                )
-                self._wait(start_time, duration / distance / count)
-
-    def loop_right(self, canvas, duration=1, count=1):
-        """Loop a canvas towards the right side of the display over a certain period of time by a
-        certain number of times. The canvas will re-enter from the left and end up back a the
-        starting position.
-
-        :param canvas: The canvas to animate.
-        :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        distance = max(canvas.width, self._matrix.width)
-        loop_image = self._create_loop_image(canvas.get_image(), distance, 0)
-        for _ in range(count):
-            for _ in range(distance):
-                start_time = time.monotonic()
-                current_x += 1
-                if current_x > 0:
-                    current_x -= distance
-                self._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    canvas.opacity,
-                    canvas.shadow_intensity,
-                    canvas.shadow_offset,
-                )
-                self._wait(start_time, duration / distance / count)
-
-    def loop_up(self, canvas, duration=0.5, count=1):
-        """Loop a canvas towards the top side of the display over a certain period of time by a
-        certain number of times. The canvas will re-enter from the bottom and end up back a the
-        starting position.
-
-        :param canvas: The canvas to animate.
-        :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        distance = max(canvas.height, self._matrix.height)
-        loop_image = self._create_loop_image(canvas.get_image(), 0, distance)
-        for _ in range(count):
-            for _ in range(distance):
-                start_time = time.monotonic()
-                current_y -= 1
-                if current_y < 0 - canvas.height:
-                    current_y += distance
-                self._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    canvas.opacity,
-                    canvas.shadow_intensity,
-                    canvas.shadow_offset,
-                )
-                self._wait(start_time, duration / distance / count)
-
-    def loop_down(self, canvas, duration=0.5, count=1):
-        """Loop a canvas towards the bottom side of the display over a certain period of time by a
-        certain number of times. The canvas will re-enter from the top and end up back a the
-        starting position.
-
-        :param canvas: The canvas to animate.
-        :param float count: (optional) The number of times to loop. (default=1)
-        :param float duration: (optional) The period of time to perform the animation
-                               over. (default=1)
-        :type canvas: OpenSignCanvas
-        """
-        current_x, current_y = self._position
-        distance = max(canvas.height, self._matrix.height)
-        loop_image = self._create_loop_image(canvas.get_image(), 0, distance)
-        for _ in range(count):
-            for _ in range(distance):
-                start_time = time.monotonic()
-                current_y += 1
-                if current_y > 0:
-                    current_y -= distance
-                self._draw_image(
-                    loop_image,
-                    current_x,
-                    current_y,
-                    canvas.opacity,
-                    canvas.shadow_intensity,
-                    canvas.shadow_offset,
-                )
-                self._wait(start_time, duration / distance / count)

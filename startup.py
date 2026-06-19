@@ -6,8 +6,7 @@
 import copy
 import time
 
-from opensign import OpenSign
-from opensign.canvas import OpenSignCanvas
+from opensign import Message, OpenSign
 
 """
 Script
@@ -26,14 +25,14 @@ def duplicate(item_to_duplicate):
 
 
 def main():
-    message1 = OpenSignCanvas()
+    message1 = Message()
     message1.add_font("comic", "/usr/share/fonts/truetype/msttcorefonts/Comic_Sans_MS.ttf", 14)
     message1.set_stroke(1, (0, 0, 0))
     message1.add_image("/home/pi/logo.png")
     message1.add_text("Maker Melissa's Lab", color=(255, 255, 0), y_offset=-2)
     message1.set_shadow()
 
-    message2 = OpenSignCanvas()
+    message2 = Message()
     message2.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
     message2.set_stroke(1, (0, 0, 0))
     message2.add_text("New Video Dropping Soon", color=(255, 128, 0))
@@ -47,16 +46,16 @@ def main():
 
     while True:
         sign.set_background_image(circuit_image)
-        sign.join_in_vertically(message1)
+        sign.join_in(message1, direction="vertically")
         time.sleep(1)
         sign.fade_out(message1)
-        sign.join_in_horizontally(message2)
+        sign.join_in(message2)
         sign.flash(message2, duration=2)
-        sign.split_out_vertically(message2)
+        sign.split_out(direction="vertically")
         time.sleep(0.5)
-        sign.scroll_in_from_left(message3)
+        sign.scroll_in(message3, from_="left")
         time.sleep(1)
-        sign.scroll_out_to_right(message3)
+        sign.scroll_out(to="right")
 
 
 # Main function
