@@ -39,6 +39,8 @@ message:
 .. code-block:: python
 
     sign.scroll_in("Hello World!", from_="right", color="#ffcc00", font="dejavu")
+    sign.wipe_out(to="left")
+    sign.fade_in("Hello again", font="dejavu")
     sign.fade_out()
 
 Animation plugins live in ``opensign/animations``. Each plugin is discovered

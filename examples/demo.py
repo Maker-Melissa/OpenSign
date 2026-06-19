@@ -60,6 +60,8 @@ def main():
         time.sleep(1)
         sign.scroll_out(to="bottom")
         sign.scroll_in(message4, from_="right")
+        sign.wipe_out(to="left")
+        sign.wipe_in(message4, from_="right")
         sign.scroll_in(
             "Hello from a temporary Message", from_="left", color="crimson", font="dejavu"
         )

@@ -327,6 +327,14 @@ class OpenSign:
         """Scroll a target off the display."""
         return self.animate(target, "Scroll", f"out_to_{to}", **kwargs)
 
+    def wipe_in(self, target, from_="left", **kwargs):
+        """Wipe a target onto the display."""
+        return self.animate(target, "Wipe", f"in_from_{from_}", **kwargs)
+
+    def wipe_out(self, target=None, to="left", **kwargs):
+        """Wipe a target off the display."""
+        return self.animate(target, "Wipe", f"out_to_{to}", **kwargs)
+
     def loop(self, target=None, direction="left", **kwargs):
         """Loop a target across the display."""
         return self.animate(target, "Loop", direction, **kwargs)
@@ -357,11 +365,11 @@ class OpenSign:
 
     def fade_in(self, target=None, duration=1, steps=50, **kwargs):
         """Fade a target in."""
-        return self.animate(target, "Static", "fade_in", duration=duration, steps=steps, **kwargs)
+        return self.animate(target, "Fade", "in_", duration=duration, steps=steps, **kwargs)
 
     def fade_out(self, target=None, duration=1, steps=50, **kwargs):
         """Fade a target out."""
-        return self.animate(target, "Static", "fade_out", duration=duration, steps=steps, **kwargs)
+        return self.animate(target, "Fade", "out", duration=duration, steps=steps, **kwargs)
 
     @staticmethod
     def _wait(start_time, duration):
