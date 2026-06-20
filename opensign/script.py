@@ -14,21 +14,6 @@ import yaml
 from . import DEFAULT, OpenSign
 
 PATH_KEYS = {"file", "image", "font_file", "background_image"}
-ANIMATION_COMMANDS = {
-    "blink",
-    "fade_in",
-    "fade_out",
-    "flash",
-    "hide",
-    "join_in",
-    "loop",
-    "scroll_in",
-    "scroll_out",
-    "show",
-    "split_out",
-    "wipe_in",
-    "wipe_out",
-}
 
 
 def _resolve_path(base_path, value):
@@ -196,9 +181,12 @@ class ScriptRunner:
 
     def _command_animate(self, params):
         config = _as_mapping(params, "animate")
-        class_name = config.pop("class")
-        method_name = config.pop("method")
-        self.sign.animate(class_name, method_name, **config)
+        animation = config.pop("name", None)
+        if animation is None:
+            class_name = config.pop("class")
+            method_name = config.pop("method")
+            animation = f"{class_name}.{method_name}"
+        self.sign.animate(animation, **config)
 
     def _command_repeat(self, params):
         config = _as_mapping(params, "repeat")
@@ -238,7 +226,9 @@ class ScriptRunner:
             self._command_animate(params)
         elif action == "repeat":
             self._command_repeat(params)
-        elif action in ANIMATION_COMMANDS:
+        elif "." in action:
+            self.sign.animate(action, **_as_mapping(params, action))
+        elif callable(getattr(self.sign, action, None)):
             getattr(self.sign, action)(**_as_mapping(params, action))
         else:
             raise ValueError(f"Unknown script command: {action}")

@@ -29,6 +29,7 @@ from PIL import Image
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 from .animations import animate as dispatch_animation
+from .animations import convenience_methods
 from .colors import parse_color
 from .fontpool import FontPool
 from .message import Message
@@ -415,67 +416,30 @@ class OpenSign:
             raise ValueError(f"Specified background file {file} was not found")
         self._background = Image.open(file).convert("RGBA")
 
-    def animate(self, class_name, method_name, *, canvas=None, **kwargs):
-        """Animate a canvas."""
+    @staticmethod
+    def _parse_animation(animation, method_name=None):
+        """Return ``(class_name, method_name)`` from an animation specification."""
+        if method_name is None:
+            try:
+                class_name, method_name = animation.split(".", 1)
+            except ValueError as error:
+                raise ValueError(
+                    "Animation must be 'Class.method' "
+                    "or passed as animate(class_name, method_name)."
+                ) from error
+        else:
+            class_name = animation
+
+        if method_name == "in":
+            method_name = "in_"
+        return class_name, method_name
+
+    def animate(self, animation, method_name=None, *, canvas=None, **kwargs):
+        """Animate a canvas using ``Class.method`` or ``(class_name, method_name)``."""
+        class_name, method_name = self._parse_animation(animation, method_name)
         message = self._resolve_message(canvas)
         self._position = message.position
         return dispatch_animation(self, message, class_name, method_name, **kwargs)
-
-    def scroll_in(self, dir_from="left", canvas=None, **kwargs):
-        """Scroll a canvas onto the display."""
-        return self.animate("Scroll", f"in_from_{dir_from}", canvas=canvas, **kwargs)
-
-    def scroll_out(self, dir_to="left", canvas=None, **kwargs):
-        """Scroll a canvas off the display."""
-        return self.animate("Scroll", f"out_to_{dir_to}", canvas=canvas, **kwargs)
-
-    def wipe_in(self, dir_from="left", canvas=None, **kwargs):
-        """Wipe a canvas onto the display."""
-        return self.animate("Wipe", f"in_from_{dir_from}", canvas=canvas, **kwargs)
-
-    def wipe_out(self, dir_to="left", canvas=None, **kwargs):
-        """Wipe a canvas off the display."""
-        return self.animate("Wipe", f"out_to_{dir_to}", canvas=canvas, **kwargs)
-
-    def loop(self, dir="left", canvas=None, **kwargs):
-        """Loop a canvas across the display."""
-        return self.animate("Loop", dir, canvas=canvas, **kwargs)
-
-    def join_in(self, dir="horizontally", canvas=None, **kwargs):
-        """Join split halves of a canvas onto the display."""
-        return self.animate("Split", f"join_in_{dir}", canvas=canvas, **kwargs)
-
-    def split_out(self, dir="horizontally", canvas=None, **kwargs):
-        """Split a canvas off the display."""
-        return self.animate("Split", f"split_out_{dir}", canvas=canvas, **kwargs)
-
-    def show(self, canvas=None, **kwargs):
-        """Show a canvas at its current position."""
-        return self.animate("Static", "show", canvas=canvas, **kwargs)
-
-    def hide(self, canvas=None, **kwargs):
-        """Hide a canvas."""
-        return self.animate("Static", "hide", canvas=canvas, **kwargs)
-
-    def blink(self, count=3, duration=1, canvas=None, **kwargs):
-        """Blink a canvas on and off."""
-        return self.animate(
-            "Static", "blink", canvas=canvas, count=count, duration=duration, **kwargs
-        )
-
-    def flash(self, count=3, duration=1, canvas=None, **kwargs):
-        """Fade a canvas in and out."""
-        return self.animate(
-            "Static", "flash", canvas=canvas, count=count, duration=duration, **kwargs
-        )
-
-    def fade_in(self, duration=1, steps=50, canvas=None, **kwargs):
-        """Fade a canvas in."""
-        return self.animate("Fade", "in_", canvas=canvas, duration=duration, steps=steps, **kwargs)
-
-    def fade_out(self, duration=1, steps=50, canvas=None, **kwargs):
-        """Fade a canvas out."""
-        return self.animate("Fade", "out", canvas=canvas, duration=duration, steps=steps, **kwargs)
 
     @staticmethod
     def _wait(start_time, duration):
@@ -483,3 +447,41 @@ class OpenSign:
         while time.monotonic() < (start_time + duration):
             pass
         return time.monotonic()
+
+
+def _make_convenience_method(spec):
+    """Build a runtime convenience method from a plugin-derived spec."""
+
+    if spec["kind"] == "prefix":
+
+        def convenience(self, canvas=None, **kwargs):
+            direction = kwargs.pop(spec["kwarg"], spec["default"])
+            method_name = f'{spec["prefix"]}{direction}'
+            return self.animate(spec["class_name"], method_name, canvas=canvas, **kwargs)
+
+    elif spec["kind"] == "choice":
+
+        def convenience(self, canvas=None, **kwargs):
+            direction = kwargs.pop(spec["kwarg"], spec["default"])
+            if direction not in spec["choices"]:
+                raise ValueError(
+                    f"Invalid {spec['kwarg']}: {direction}. "
+                    f"Choose from {', '.join(spec['choices'])}."
+                )
+            return self.animate(spec["class_name"], direction, canvas=canvas, **kwargs)
+
+    else:
+
+        def convenience(self, canvas=None, **kwargs):
+            return self.animate(spec["class_name"], spec["method_name"], canvas=canvas, **kwargs)
+
+    convenience.__name__ = spec["name"]
+    convenience.__doc__ = (
+        f"Convenience wrapper for {spec['class_name']} animation plugin."
+    )
+    return convenience
+
+
+for _spec in convenience_methods():
+    if not hasattr(OpenSign, _spec["name"]):
+        setattr(OpenSign, _spec["name"], _make_convenience_method(_spec))

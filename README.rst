@@ -53,11 +53,11 @@ When Python code needs direct control over message content, edit
     sign = OpenSign(chain=6)
     sign.add_text("Hello ", color="#ffcc00")
     sign.add_text("World!", color="lime")
-    sign.animate("Scroll", "in_from_left", duration=2)
+    sign.scroll_in(dir_from="left", duration=2)
 
 Animation plugins live in ``opensign/animations``. Each plugin is discovered
 from its module name, so adding ``opensign/animations/wipe.py`` with a ``Wipe``
-class makes ``sign.animate("Wipe", "method_name")`` available without
+class makes ``sign.animate("Wipe.method_name")`` available without
 editing a central animation dictionary.
 
 Advanced Canvases
