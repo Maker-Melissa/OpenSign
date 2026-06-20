@@ -1,0 +1,146 @@
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
+sign:
+  chain: 6
+  slowdown_gpio: 5
+  background_image: background.jpg
+
+fonts:
+  dejavu:
+    file: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+    size: 14
+  comic:
+    file: /usr/share/fonts/truetype/msttcorefonts/Comic_Sans_MS.ttf
+    size: 14
+
+repeat: forever
+
+steps:
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0.5, 1]
+  - add_text:
+      text: Scroll Text In
+      font: dejavu
+      color: [255, 0, 0]
+      stroke: [1, [255, 255, 255]]
+  - scroll_in:
+      dir_from: left
+  - sleep: 1
+
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0.5, 1]
+  - add_text:
+      text: Change Messages
+      font: dejavu
+      color: [255, 0, 0]
+      stroke: [1, [255, 255, 255]]
+  - show
+  - sleep: 1
+
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0.5, 1]
+  - add_text:
+      text: And Scroll Out
+      font: dejavu
+      color: [255, 0, 0]
+      stroke: [1, [255, 255, 255]]
+  - show
+  - scroll_out:
+      dir_to: right
+  - sleep: 1
+
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0.5, 1]
+  - add_text:
+      text: Scroll Text In
+      font: dejavu
+      color: [255, 0, 0]
+      stroke: [1, [255, 255, 255]]
+  - join_in:
+      dir: vertically
+  - loop:
+      dir: left
+  - flash:
+      count: 3
+  - split_out:
+      dir: vertically
+  - sleep: 1
+
+  - set_background_color: [0, 255, 0]
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0.5, 1]
+  - add_image:
+      file: logo.png
+  - add_text:
+      text: Maker Melissa's Lab
+      font: comic
+      color: [255, 255, 0]
+      stroke: [1, [0, 0, 0]]
+  - fade_in
+  - sleep: 1
+
+  - fade_out
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0, 0]
+  - add_text:
+      text: https://makermelissa.com/
+      font: dejavu
+      color: [255, 0, 0]
+      stroke: [1, [0, 0, 0]]
+  - scroll_in:
+      dir_from: top
+  - sleep: 1
+
+  - scroll_out:
+      dir_to: bottom
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0.5, 1]
+  - add_text:
+      text: Subscribe to my Channel
+      font: dejavu
+      color: [255, 255, 255]
+      stroke: [1, [0, 0, 0]]
+  - scroll_in:
+      dir_from: right
+  - wipe_out:
+      dir_to: left
+
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0.5, 1]
+  - add_text:
+      text: Subscribe to my Channel
+      font: dejavu
+      color: [255, 255, 255]
+      stroke: [1, [0, 0, 0]]
+  - wipe_in:
+      dir_from: right
+
+  - clear: default
+  - set_canvas:
+      canvas: default
+      shadow: [0, 0]
+  - add_text:
+      text: Hello from the managed Message
+      font: dejavu
+      color: crimson
+  - scroll_in:
+      dir_from: left
+  - sleep: 1

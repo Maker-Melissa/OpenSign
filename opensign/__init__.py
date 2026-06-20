@@ -25,7 +25,7 @@ Implementation Notes
 import os
 import time
 
-from PIL import Image, ImageChops
+from PIL import Image
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 from .animations import animate as dispatch_animation
@@ -35,6 +35,7 @@ from .message import Message
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/Maker-Melissa/PyOpenSign.git"
+DEFAULT = "default"
 
 
 # pylint: disable=too-many-public-methods, too-many-lines
@@ -97,8 +98,8 @@ class OpenSign:
         self._background = (0, 0, 0)
         self._position = (0, 0)
         self.fonts = FontPool()
-        self.message = Message()
-        self._message_ready = False
+        self.message = Message(font_pool=self.fonts, on_change=self._readjust_message_position)
+        self.canvases = {DEFAULT: self.message}
         # pylint: enable=too-many-locals
 
     def add_font(self, name, file, size=None):
@@ -124,19 +125,57 @@ class OpenSign:
 
         return font
 
-    def _resolve_message(self):
-        """Return the managed message when it has content."""
-        if not self._message_ready and not (self.message.width or self.message.height):
-            raise ValueError("No message has been created yet.")
-        self._message_ready = True
-        return self.message
+    def _resolve_canvas(self, canvas=None):
+        """Return a canvas from a name, Message object, or the default message."""
+        if canvas is None:
+            return self.message
+        if isinstance(canvas, Message):
+            return canvas
+        if isinstance(canvas, str):
+            try:
+                return self.canvases[canvas]
+            except KeyError as error:
+                raise ValueError(f"Canvas {canvas!r} was not found.") from error
+        raise TypeError("Canvas must be a name, Message, or None.")
 
-    def _readjust_message_position(self):
-        """Recenter the managed message after its contents change."""
-        if self.message.width or self.message.height:
-            self._position = self._get_centered_position(self.message)
+    def _resolve_message(self, canvas=None):
+        """Return a canvas when it has content."""
+        message = self._resolve_canvas(canvas)
+        if not (message.width or message.height):
+            raise ValueError("No message has been created yet.")
+        return message
+
+    def _readjust_message_position(self, canvas=None):
+        """Recenter a canvas after its contents change."""
+        message = self._resolve_canvas(canvas)
+        if message.width or message.height:
+            message.position = self._get_centered_position(message)
         else:
-            self._position = (0, 0)
+            message.position = (0, 0)
+        if message is self.message:
+            self._position = message.position
+
+    def create_canvas(self, name, **kwargs):
+        """Create and register a persistent canvas."""
+        if name in self.canvases:
+            raise ValueError(f"Canvas {name!r} already exists.")
+        self.canvases[name] = Message(
+            font_pool=self.fonts,
+            on_change=self._readjust_message_position,
+            **kwargs,
+        )
+        self._readjust_message_position(name)
+        return self.canvases[name]
+
+    def get_canvas(self, name):
+        """Return a registered persistent canvas."""
+        return self._resolve_canvas(name)
+
+    def remove_canvas(self, name):
+        """Remove a registered persistent canvas."""
+        if name == DEFAULT:
+            raise ValueError("The default message canvas cannot be removed.")
+        del self.canvases[name]
 
     # pylint: disable=too-many-arguments
     def add_text(
@@ -151,35 +190,31 @@ class OpenSign:
         stroke_color=None,
         x_offset=0,
         y_offset=0,
+        canvas=None,
     ):
-        """Add text to the managed message."""
-        if stroke is not None:
-            stroke_width, stroke_color = stroke
-        self.message.add_text(
+        """Add text to the default canvas, or to a named canvas when provided."""
+        self._resolve_canvas(canvas).add_text(
             text,
             color=color,
-            font=self._resolve_font(font, font_file, font_size),
+            font=font,
+            font_file=font_file,
+            font_size=font_size,
+            stroke=stroke,
             stroke_width=stroke_width,
             stroke_color=stroke_color,
             x_offset=x_offset,
             y_offset=y_offset,
         )
-        self._message_ready = True
-        self._readjust_message_position()
 
     # pylint: enable=too-many-arguments
 
-    def add_image(self, file):
-        """Add an image to the managed message."""
-        self.message.add_image(file)
-        self._message_ready = True
-        self._readjust_message_position()
+    def add_image(self, file, canvas=None):
+        """Add an image to the default canvas, or to a named canvas when provided."""
+        self._resolve_canvas(canvas).add_image(file)
 
-    def clear(self):
-        """Clear the managed message contents."""
-        self.message.clear()
-        self._message_ready = False
-        self._readjust_message_position()
+    def clear(self, canvas=None):
+        """Clear the default canvas, or a named canvas when provided."""
+        self._resolve_canvas(canvas).clear()
 
     def _update(self):
         self._buffer = self._matrix.SwapOnVSync(self._buffer)
@@ -194,69 +229,96 @@ class OpenSign:
         """Returns the height in pixels"""
         return self._matrix.height
 
-    # pylint: disable=too-many-arguments, too-many-locals
-    def _add_background(self, image, x, y, opacity=1.0, shadow_intensity=0, shadow_offset=1):
-        """Combine the foreground and background images and apply any shadow and opacity effects."""
+    def _background_image(self):
+        """Return a full-size RGBA background image."""
         if isinstance(self._background, tuple):
-            combined_image = Image.new(
+            return Image.new(
                 "RGBA", (self._matrix.width, self._matrix.height), self._background
             )
-        else:
-            combined_image = Image.new("RGBA", (self._matrix.width, self._matrix.height))
-            combined_image.alpha_composite(self._background)
 
-        source_x = source_y = 0
-        if x < 0:
-            source_x = 0 - x
-            x = 0
-        if y < 0:
-            source_y = 0 - y
-            y = 0
+        combined_image = Image.new("RGBA", (self._matrix.width, self._matrix.height))
+        combined_image.alpha_composite(self._background)
+        return combined_image
 
-        # Keep opacity in the range of 0-1.0
-        opacity = max(0, min(1.0, opacity))
+    def _positioned_foreground(self, image, x, y, opacity=1.0):
+        """Return a full-size foreground image clipped to the display bounds."""
+        source_x = max(0 - x, 0)
+        source_y = max(0 - y, 0)
+        dest_x = max(x, 0)
+        dest_y = max(y, 0)
+        visible_width = min(image.width - source_x, self._matrix.width - dest_x)
+        visible_height = min(image.height - source_y, self._matrix.height - dest_y)
 
         foreground_image = Image.new(
             "RGBA", (self._matrix.width, self._matrix.height), (0, 0, 0, 0)
         )
-        if source_x < image.width and source_y < image.height:
-            foreground_image.alpha_composite(image, dest=(x, y), source=(source_x, source_y))
+        if visible_width <= 0 or visible_height <= 0:
+            return foreground_image
+
+        visible_image = image.crop(
+            (
+                source_x,
+                source_y,
+                source_x + visible_width,
+                source_y + visible_height,
+            )
+        )
+        foreground_image.alpha_composite(visible_image, dest=(dest_x, dest_y))
+
+        opacity = max(0, min(1.0, opacity))
+        if opacity < 1:
+            alpha = foreground_image.split()[-1]
+            foreground_image.putalpha(alpha.point(lambda value: round(value * opacity)))
+        return foreground_image
+
+    def _composite_layer(
+        self,
+        combined_image,
+        image,
+        x,
+        y,
+        opacity=1.0,
+        shadow_intensity=0,
+        shadow_offset=0,
+    ):
+        """Composite one image layer onto a full-size RGBA image."""
+        foreground_image = self._positioned_foreground(image, x, y, opacity=opacity)
 
         alpha = foreground_image.split()[-1]
-
-        if opacity == 1:
-            opacity_mask = ImageChops.invert(alpha)
-        elif opacity == 0:
-            opacity_mask = Image.new("L", (self._matrix.width, self._matrix.height), 255)
-        else:
-            opacity_filter = Image.new(
-                "L", (self._matrix.width, self._matrix.height), round(opacity * 255)
-            )
-            opacity_mask = ImageChops.darker(alpha, opacity_filter)
-            opacity_mask = ImageChops.invert(opacity_mask)
-
         if shadow_intensity:
-            shadow_image = Image.new("RGB", (self._matrix.width, self._matrix.height))
-            shadow_filter = Image.new(
-                "L",
-                (self._matrix.width, self._matrix.height),
-                round(shadow_intensity * opacity * 255),
-            )
-            shadow_mask = ImageChops.darker(alpha, shadow_filter)
-            shadow_shifted = Image.new("L", (self._matrix.width, self._matrix.height), 0)
-            shadow_shifted.paste(shadow_mask, box=(shadow_offset, shadow_offset))
-            shadow_shifted = ImageChops.invert(shadow_shifted)
-            combined_image = Image.composite(combined_image, shadow_image, shadow_shifted)
+            shadow_alpha = alpha.point(lambda value: round(value * shadow_intensity))
+            shadow_shifted = Image.new("L", alpha.size, 0)
+            shadow_shifted.paste(shadow_alpha, box=(shadow_offset, shadow_offset))
+            shadow_image = Image.new("RGBA", combined_image.size, (0, 0, 0, 0))
+            shadow_image.putalpha(shadow_shifted)
+            combined_image.alpha_composite(shadow_image)
 
-        return Image.composite(combined_image, foreground_image, opacity_mask).convert("RGB")
+        combined_image.alpha_composite(foreground_image)
+        return combined_image
 
-    # pylint: enable=too-many-arguments, too-many-locals
+    # pylint: disable=too-many-arguments
+    def _add_background(self, image, x, y, opacity=1.0, shadow_intensity=0, shadow_offset=1):
+        """Combine one foreground image with the background."""
+        combined_image = self._background_image()
+        combined_image = self._composite_layer(
+            combined_image,
+            image,
+            x,
+            y,
+            opacity=opacity,
+            shadow_intensity=shadow_intensity,
+            shadow_offset=shadow_offset,
+        )
+        return combined_image.convert("RGB")
+
+    # pylint: enable=too-many-arguments
 
     def _draw(self, canvas, x, y, opacity=1.0):
         """Draws a canvas to the buffer taking its current settings into account.
         It also sets the current position and performs a swap.
         """
         self._position = (x, y)
+        canvas.position = (x, y)
         self._buffer.SetImage(
             self._add_background(
                 canvas.get_image(),
@@ -292,6 +354,28 @@ class OpenSign:
         self._update()
 
     # pylint: enable=too-many-arguments
+
+    def draw_canvases(self, *canvases):
+        """Draw multiple persistent canvases in order."""
+        if not canvases:
+            canvases = tuple(self.canvases)
+
+        combined_image = self._background_image()
+        for canvas in canvases:
+            message = self._resolve_message(canvas)
+            x, y = message.position
+            combined_image = self._composite_layer(
+                combined_image,
+                message.get_image(),
+                x,
+                y,
+                opacity=message.opacity,
+                shadow_intensity=message.shadow_intensity,
+                shadow_offset=message.shadow_offset,
+            )
+
+        self._buffer.SetImage(combined_image.convert("RGB"), 0, 0)
+        self._update()
 
     # pylint: disable=no-self-use
     def _create_loop_image(self, image, x_offset, y_offset):
@@ -331,62 +415,67 @@ class OpenSign:
             raise ValueError(f"Specified background file {file} was not found")
         self._background = Image.open(file).convert("RGBA")
 
-    def animate(self, class_name, method_name, **kwargs):
-        """Animate the managed message."""
-        message = self._resolve_message()
+    def animate(self, class_name, method_name, *, canvas=None, **kwargs):
+        """Animate a canvas."""
+        message = self._resolve_message(canvas)
+        self._position = message.position
         return dispatch_animation(self, message, class_name, method_name, **kwargs)
 
-    def scroll_in(self, dir_from="left", **kwargs):
-        """Scroll the managed message onto the display."""
-        return self.animate("Scroll", f"in_from_{dir_from}", **kwargs)
+    def scroll_in(self, dir_from="left", canvas=None, **kwargs):
+        """Scroll a canvas onto the display."""
+        return self.animate("Scroll", f"in_from_{dir_from}", canvas=canvas, **kwargs)
 
-    def scroll_out(self, dir_to="left", **kwargs):
-        """Scroll the managed message off the display."""
-        return self.animate("Scroll", f"out_to_{dir_to}", **kwargs)
+    def scroll_out(self, dir_to="left", canvas=None, **kwargs):
+        """Scroll a canvas off the display."""
+        return self.animate("Scroll", f"out_to_{dir_to}", canvas=canvas, **kwargs)
 
-    def wipe_in(self, dir_from="left", **kwargs):
-        """Wipe the managed message onto the display."""
-        return self.animate("Wipe", f"in_from_{dir_from}", **kwargs)
+    def wipe_in(self, dir_from="left", canvas=None, **kwargs):
+        """Wipe a canvas onto the display."""
+        return self.animate("Wipe", f"in_from_{dir_from}", canvas=canvas, **kwargs)
 
-    def wipe_out(self, dir_to="left", **kwargs):
-        """Wipe the managed message off the display."""
-        return self.animate("Wipe", f"out_to_{dir_to}", **kwargs)
+    def wipe_out(self, dir_to="left", canvas=None, **kwargs):
+        """Wipe a canvas off the display."""
+        return self.animate("Wipe", f"out_to_{dir_to}", canvas=canvas, **kwargs)
 
-    def loop(self, dir="left", **kwargs):
-        """Loop the managed message across the display."""
-        return self.animate("Loop", dir, **kwargs)
+    def loop(self, dir="left", canvas=None, **kwargs):
+        """Loop a canvas across the display."""
+        return self.animate("Loop", dir, canvas=canvas, **kwargs)
 
-    def join_in(self, dir="horizontally", **kwargs):
-        """Join split halves of the managed message onto the display."""
-        return self.animate("Split", f"join_in_{dir}", **kwargs)
+    def join_in(self, dir="horizontally", canvas=None, **kwargs):
+        """Join split halves of a canvas onto the display."""
+        return self.animate("Split", f"join_in_{dir}", canvas=canvas, **kwargs)
 
-    def split_out(self, dir="horizontally", **kwargs):
-        """Split the managed message off the display."""
-        return self.animate("Split", f"split_out_{dir}", **kwargs)
+    def split_out(self, dir="horizontally", canvas=None, **kwargs):
+        """Split a canvas off the display."""
+        return self.animate("Split", f"split_out_{dir}", canvas=canvas, **kwargs)
 
-    def show(self, **kwargs):
-        """Show the managed message at the current position."""
-        return self.animate("Static", "show", **kwargs)
+    def show(self, canvas=None, **kwargs):
+        """Show a canvas at its current position."""
+        return self.animate("Static", "show", canvas=canvas, **kwargs)
 
-    def hide(self, **kwargs):
-        """Hide the managed message."""
-        return self.animate("Static", "hide", **kwargs)
+    def hide(self, canvas=None, **kwargs):
+        """Hide a canvas."""
+        return self.animate("Static", "hide", canvas=canvas, **kwargs)
 
-    def blink(self, count=3, duration=1, **kwargs):
-        """Blink the managed message on and off."""
-        return self.animate("Static", "blink", count=count, duration=duration, **kwargs)
+    def blink(self, count=3, duration=1, canvas=None, **kwargs):
+        """Blink a canvas on and off."""
+        return self.animate(
+            "Static", "blink", canvas=canvas, count=count, duration=duration, **kwargs
+        )
 
-    def flash(self, count=3, duration=1, **kwargs):
-        """Fade the managed message in and out."""
-        return self.animate("Static", "flash", count=count, duration=duration, **kwargs)
+    def flash(self, count=3, duration=1, canvas=None, **kwargs):
+        """Fade a canvas in and out."""
+        return self.animate(
+            "Static", "flash", canvas=canvas, count=count, duration=duration, **kwargs
+        )
 
-    def fade_in(self, duration=1, steps=50, **kwargs):
-        """Fade the managed message in."""
-        return self.animate("Fade", "in_", duration=duration, steps=steps, **kwargs)
+    def fade_in(self, duration=1, steps=50, canvas=None, **kwargs):
+        """Fade a canvas in."""
+        return self.animate("Fade", "in_", canvas=canvas, duration=duration, steps=steps, **kwargs)
 
-    def fade_out(self, duration=1, steps=50, **kwargs):
-        """Fade the managed message out."""
-        return self.animate("Fade", "out", duration=duration, steps=steps, **kwargs)
+    def fade_out(self, duration=1, steps=50, canvas=None, **kwargs):
+        """Fade a canvas out."""
+        return self.animate("Fade", "out", canvas=canvas, duration=duration, steps=steps, **kwargs)
 
     @staticmethod
     def _wait(start_time, duration):

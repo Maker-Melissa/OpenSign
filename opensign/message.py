@@ -34,8 +34,12 @@ class Message:
         shadow_offset=0,
         x_offset=0,
         y_offset=0,
+        font_pool=None,
+        on_change=None,
     ):
         self._fonts = {}
+        self._font_pool = font_pool
+        self._on_change = on_change
         self._current_font = None
         self._current_color = (255, 0, 0, 255)
         self._image = Image.new("RGBA", (0, 0), (0, 0, 0, 0))
@@ -46,6 +50,7 @@ class Message:
         self._shadow_intensity = 0
         self._shadow_offset = 0
         self._opacity = 1.0
+        self._position = (0, 0)
         if font_file is not None:
             font = self.load_font(font_file, font_size)
         self.font = font
@@ -74,12 +79,38 @@ class Message:
             return ImageFont.truetype(file, size)
         return ImageFont.load(file)
 
+    def _changed(self):
+        if self._on_change is not None:
+            self._on_change(self)
+
+    def _resolve_font(self, font=None, font_file=None, font_size=None):
+        if font_file is not None:
+            return self.load_font(font_file, font_size)
+
+        if isinstance(font, str):
+            if font in self._fonts:
+                return self._fonts[font]
+            if self._font_pool is not None:
+                resolved_font = self._font_pool.get(font)
+                if resolved_font is not None:
+                    return resolved_font
+            raise ValueError("Font name not found.")
+
+        return font
+
     def _convert_color(self, color):
         return parse_color_alpha(color)
 
     def _enlarge_canvas(self, width, height):
         new_width = max(self._cursor[0] + width, self._image.width)
         new_height = max(self._cursor[1] + height, self._image.height)
+        self._resize_canvas(new_width, new_height)
+
+    def _resize_canvas(self, width, height):
+        if width <= self._image.width and height <= self._image.height:
+            return
+        new_width = max(width, self._image.width)
+        new_height = max(height, self._image.height)
         new_image = Image.new("RGBA", (new_width, new_height), (0, 0, 0, 0))
         new_image.alpha_composite(self._image)
         self._image = new_image
@@ -91,18 +122,23 @@ class Message:
         text,
         color=None,
         font=None,
+        font_file=None,
+        font_size=None,
+        stroke=None,
         stroke_width=None,
         stroke_color=None,
         x_offset=0,
         y_offset=0,
     ):
         """Add text to the message."""
-        if isinstance(font, str):
-            font = self._fonts[font]
-        elif font is None:
+        font = self._resolve_font(font, font_file, font_size)
+        if font is None:
             font = self._current_font
         if font is None:
             font = ImageFont.load_default()
+
+        if stroke is not None:
+            stroke_width, stroke_color = stroke
 
         x, y = self._cursor
         color = self._current_color if color is None else parse_color_alpha(color)
@@ -113,10 +149,13 @@ class Message:
 
         lines = text.split("\n")
         for index, line in enumerate(lines):
-            text_width, text_height = self._text_size(font, line, stroke_width=stroke_width)
-            self._enlarge_canvas(text_width, text_height)
+            left, top, right, bottom = font.getbbox(line, stroke_width=stroke_width)
+            text_width, text_height = right - left, bottom - top
+            text_x = x + x_offset
+            text_y = y + y_offset
+            self._resize_canvas(text_x + text_width, text_y + text_height)
             self._draw.text(
-                (x + x_offset, y + y_offset),
+                (text_x - left, text_y - top),
                 line,
                 font=font,
                 fill=color,
@@ -128,6 +167,7 @@ class Message:
                 y += text_height
                 self._cursor[0] = 0
                 self._cursor[1] += text_height
+        self._changed()
 
     # pylint: enable=too-many-arguments
 
@@ -144,12 +184,14 @@ class Message:
         self._enlarge_canvas(new_image.width, new_image.height)
         self._image.alpha_composite(new_image, dest=(x, y))
         self._cursor[0] += new_image.width
+        self._changed()
 
     def clear(self):
         """Clear the message content, but retain style settings."""
         self._image = Image.new("RGBA", (0, 0), (0, 0, 0, 0))
         self._draw = ImageDraw.Draw(self._image)
         self._cursor = [0, 0]
+        self._changed()
 
     def get_image(self):
         """Get the message content as an image."""
@@ -172,11 +214,7 @@ class Message:
 
     @font.setter
     def font(self, value):
-        if isinstance(value, str):
-            if self._fonts.get(value) is None:
-                raise ValueError("Font name not found.")
-            value = self._fonts[value]
-        self._current_font = value
+        self._current_font = self._resolve_font(value)
 
     @property
     def color(self):
@@ -275,5 +313,17 @@ class Message:
     def cursor(self, value):
         if isinstance(value, (tuple, list)) and len(value) >= 2:
             self._cursor = [value[0], value[1]]
+        else:
+            raise TypeError("Value must be a tuple or list.")
+
+    @property
+    def position(self):
+        """Get or set the display position."""
+        return self._position
+
+    @position.setter
+    def position(self, value):
+        if isinstance(value, (tuple, list)) and len(value) >= 2:
+            self._position = (value[0], value[1])
         else:
             raise TypeError("Value must be a tuple or list.")

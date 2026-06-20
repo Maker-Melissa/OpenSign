@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: 2020 Melissa LeBlanc-Williams
+#
+# SPDX-License-Identifier: MIT
+
+sign:
+  chain: 6
+  slowdown_gpio: 5
+  background_image: background.jpg
+
+fonts:
+  dejavu:
+    file: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+    size: 14
+
+canvases:
+  logo: {}
+
+repeat: forever
+
+steps:
+  - clear: default
+  - clear: logo
+
+  - add_text:
+      text: Default Canvas
+      font: dejavu
+      color: red
+      stroke: [1, black]
+
+  - set_canvas:
+      canvas: default
+      opacity: 0.55
+      shadow: [0.5, 1]
+
+  - add_image:
+      canvas: logo
+      file: logo.png
+
+  - set_canvas:
+      canvas: logo
+      opacity: 0.55
+      position: default
+
+  - draw_canvases: [default, logo]
+  - sleep: 2
+
+  - scroll_out:
+      canvas: logo
+      dir_to: right
+
+  - sleep: 1
+
+  - scroll_in:
+      canvas: logo
+      dir_from: left
+
+  - set_canvas:
+      canvas: logo
+      position: default
+
+  - draw_canvases: [default, logo]
+  - sleep: 2

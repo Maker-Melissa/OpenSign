@@ -3,3 +3,4 @@
 # SPDX-License-Identifier: MIT
 
 pillow >= 9.2.0
+PyYAML >= 6.0

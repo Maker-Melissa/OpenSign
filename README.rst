@@ -60,6 +60,84 @@ from its module name, so adding ``opensign/animations/wipe.py`` with a ``Wipe``
 class makes ``sign.animate("Wipe", "method_name")`` available without
 editing a central animation dictionary.
 
+Advanced Canvases
+=================
+
+For layered effects, create additional persistent canvases. Each canvas keeps
+its own content, opacity, and position:
+
+.. code-block:: python
+
+    from opensign import DEFAULT
+
+    default_canvas = sign.get_canvas(DEFAULT)
+    front = sign.create_canvas("front")
+
+    sign.add_text("Back", color="red")
+    front.add_text("Front", color="blue")
+
+    default_canvas.opacity = 0.5
+    front.opacity = 0.5
+    front.position = default_canvas.position
+
+    sign.draw_canvases(default_canvas, front)
+
+Animations can also target a named canvas:
+
+.. code-block:: python
+
+    sign.scroll_in(canvas="front", dir_from="right")
+
+YAML Scripts
+============
+
+PyOpenSign can run simple YAML scripts with the ``osscript`` command:
+
+.. code-block:: shell
+
+    osscript examples/multiple_canvases.yml
+
+Scripts use top-level setup sections and ordered steps:
+
+.. code-block:: yaml
+
+    sign:
+      chain: 6
+      slowdown_gpio: 5
+      background_image: background.jpg
+
+    fonts:
+      dejavu:
+        file: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+        size: 14
+
+    canvases:
+      front: {}
+
+    repeat: forever
+
+    steps:
+      - clear: default
+      - clear: front
+      - add_text:
+          text: Back
+          font: dejavu
+          color: red
+      - add_text:
+          canvas: front
+          text: Front
+          font: dejavu
+          color: blue
+      - set_canvas:
+          canvas: front
+          opacity: 0.5
+          position: default
+      - draw_canvases: [default, front]
+      - sleep: 1
+      - scroll_in:
+          canvas: front
+          dir_from: left
+
 Dependencies
 =============
 This library depends on:
