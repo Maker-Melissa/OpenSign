@@ -18,9 +18,8 @@ fonts:
 repeat: forever
 
 steps:
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0.5, 1]
   - add_text:
       text: Scroll Text In
@@ -31,9 +30,8 @@ steps:
       dir_from: left
   - sleep: 1
 
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0.5, 1]
   - add_text:
       text: Change Messages
@@ -43,9 +41,8 @@ steps:
   - show
   - sleep: 1
 
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0.5, 1]
   - add_text:
       text: And Scroll Out
@@ -57,9 +54,8 @@ steps:
       dir_to: right
   - sleep: 1
 
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0.5, 1]
   - add_text:
       text: Scroll Text In
@@ -77,9 +73,8 @@ steps:
   - sleep: 1
 
   - set_background_color: [0, 255, 0]
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0.5, 1]
   - add_image:
       file: logo.png
@@ -92,9 +87,8 @@ steps:
   - sleep: 1
 
   - fade_out
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0, 0]
   - add_text:
       text: https://makermelissa.com/
@@ -107,9 +101,8 @@ steps:
 
   - scroll_out:
       dir_to: bottom
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0.5, 1]
   - add_text:
       text: Subscribe to my Channel
@@ -121,9 +114,8 @@ steps:
   - wipe_out:
       dir_to: left
 
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0.5, 1]
   - add_text:
       text: Subscribe to my Channel
@@ -133,9 +125,8 @@ steps:
   - wipe_in:
       dir_from: right
 
-  - clear: default
+  - clear
   - set_canvas:
-      canvas: default
       shadow: [0, 0]
   - add_text:
       text: Hello from the managed Message

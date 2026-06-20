@@ -98,6 +98,8 @@ PyOpenSign can run simple YAML scripts with the ``osscript`` command:
     osscript examples/multiple_canvases.yml
 
 Scripts use top-level setup sections and ordered steps:
+For single-canvas scripts, the default canvas is implicit, so ``canvas: default``
+is only needed once you start working with multiple canvases.
 
 .. code-block:: yaml
 
