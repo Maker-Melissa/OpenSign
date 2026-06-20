@@ -142,7 +142,7 @@ def _load_animation_class(class_name):
     return getattr(animation_class, class_name)
 
 
-def animate(sign, target, class_name, method_name, **kwargs):
+def animate(sign, message, class_name, method_name, **kwargs):
     """Dispatch an animation by plugin class and method name."""
     animation_class = _load_animation_class(class_name)
     animation = animation_class(sign)
@@ -152,7 +152,7 @@ def animate(sign, target, class_name, method_name, **kwargs):
     except AttributeError as error:
         raise ValueError(f"Unknown {class_name} animation: {method_name}") from error
 
-    return method(target, **kwargs)
+    return method(message, **kwargs)
 
 
 Animations.load_animations()

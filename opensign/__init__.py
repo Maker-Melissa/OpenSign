@@ -97,7 +97,8 @@ class OpenSign:
         self._background = (0, 0, 0)
         self._position = (0, 0)
         self.fonts = FontPool()
-        self._last_canvas = None
+        self.message = Message()
+        self._message_ready = False
         # pylint: enable=too-many-locals
 
     def add_font(self, name, file, size=None):
@@ -111,39 +112,74 @@ class OpenSign:
         """
         return self.fonts.add_font(name, file, size)
 
-    def _resolve_canvas(self, target, **kwargs):
-        """Return a Message for a renderable target or text string."""
-        if isinstance(target, Message):
-            self._last_canvas = target
-            return target
+    def _resolve_font(self, font, font_file=None, font_size=None):
+        """Return a font object from a shared name, file, or direct font object."""
+        if font_file is not None:
+            return Message.load_font(font_file, font_size)
 
-        if target is None:
-            if self._last_canvas is None:
-                raise ValueError("No message has been created yet.")
-            return self._last_canvas
-
-        if not isinstance(target, str):
-            raise TypeError("Target must be a Message, string, or None.")
-
-        font = kwargs.get("font")
         if isinstance(font, str):
             font = self.fonts.get(font)
             if font is None:
                 raise ValueError("Font name not found.")
 
-        message = Message(
-            target,
-            image=kwargs.get("image"),
-            font=font,
-            color=kwargs.get("color", (255, 0, 0)),
-            opacity=kwargs.get("opacity", 1.0),
-            stroke_width=kwargs.get("stroke_width", 0),
-            stroke_color=kwargs.get("stroke_color"),
-            shadow_intensity=kwargs.get("shadow_intensity", 0),
-            shadow_offset=kwargs.get("shadow_offset", 0),
+        return font
+
+    def _resolve_message(self):
+        """Return the managed message when it has content."""
+        if not self._message_ready and not (self.message.width or self.message.height):
+            raise ValueError("No message has been created yet.")
+        self._message_ready = True
+        return self.message
+
+    def _readjust_message_position(self):
+        """Recenter the managed message after its contents change."""
+        if self.message.width or self.message.height:
+            self._position = self._get_centered_position(self.message)
+        else:
+            self._position = (0, 0)
+
+    # pylint: disable=too-many-arguments
+    def add_text(
+        self,
+        text,
+        color=None,
+        font=None,
+        font_file=None,
+        font_size=None,
+        stroke=None,
+        stroke_width=None,
+        stroke_color=None,
+        x_offset=0,
+        y_offset=0,
+    ):
+        """Add text to the managed message."""
+        if stroke is not None:
+            stroke_width, stroke_color = stroke
+        self.message.add_text(
+            text,
+            color=color,
+            font=self._resolve_font(font, font_file, font_size),
+            stroke_width=stroke_width,
+            stroke_color=stroke_color,
+            x_offset=x_offset,
+            y_offset=y_offset,
         )
-        self._last_canvas = message
-        return message
+        self._message_ready = True
+        self._readjust_message_position()
+
+    # pylint: enable=too-many-arguments
+
+    def add_image(self, file):
+        """Add an image to the managed message."""
+        self.message.add_image(file)
+        self._message_ready = True
+        self._readjust_message_position()
+
+    def clear(self):
+        """Clear the managed message contents."""
+        self.message.clear()
+        self._message_ready = False
+        self._readjust_message_position()
 
     def _update(self):
         self._buffer = self._matrix.SwapOnVSync(self._buffer)
@@ -295,76 +331,62 @@ class OpenSign:
             raise ValueError(f"Specified background file {file} was not found")
         self._background = Image.open(file).convert("RGBA")
 
-    def animate(self, target, class_name, method_name, **kwargs):
-        """Animate a Message or text string."""
-        message_kwargs = {
-            key: kwargs.pop(key)
-            for key in (
-                "font",
-                "color",
-                "stroke_width",
-                "stroke_color",
-                "shadow_intensity",
-                "shadow_offset",
-                "opacity",
-                "image",
-            )
-            if key in kwargs
-        }
-        message = self._resolve_canvas(target, **message_kwargs)
+    def animate(self, class_name, method_name, **kwargs):
+        """Animate the managed message."""
+        message = self._resolve_message()
         return dispatch_animation(self, message, class_name, method_name, **kwargs)
 
-    def scroll_in(self, target, dir_from="left", **kwargs):
-        """Scroll a target onto the display."""
-        return self.animate(target, "Scroll", f"in_from_{dir_from}", **kwargs)
+    def scroll_in(self, dir_from="left", **kwargs):
+        """Scroll the managed message onto the display."""
+        return self.animate("Scroll", f"in_from_{dir_from}", **kwargs)
 
-    def scroll_out(self, target=None, dir_to="left", **kwargs):
-        """Scroll a target off the display."""
-        return self.animate(target, "Scroll", f"out_to_{dir_to}", **kwargs)
+    def scroll_out(self, dir_to="left", **kwargs):
+        """Scroll the managed message off the display."""
+        return self.animate("Scroll", f"out_to_{dir_to}", **kwargs)
 
-    def wipe_in(self, target, dir_from="left", **kwargs):
-        """Wipe a target onto the display."""
-        return self.animate(target, "Wipe", f"in_from_{dir_from}", **kwargs)
+    def wipe_in(self, dir_from="left", **kwargs):
+        """Wipe the managed message onto the display."""
+        return self.animate("Wipe", f"in_from_{dir_from}", **kwargs)
 
-    def wipe_out(self, target=None, dir_to="left", **kwargs):
-        """Wipe a target off the display."""
-        return self.animate(target, "Wipe", f"out_to_{dir_to}", **kwargs)
+    def wipe_out(self, dir_to="left", **kwargs):
+        """Wipe the managed message off the display."""
+        return self.animate("Wipe", f"out_to_{dir_to}", **kwargs)
 
-    def loop(self, target=None, dir="left", **kwargs):
-        """Loop a target across the display."""
-        return self.animate(target, "Loop", dir, **kwargs)
+    def loop(self, dir="left", **kwargs):
+        """Loop the managed message across the display."""
+        return self.animate("Loop", dir, **kwargs)
 
-    def join_in(self, target, dir="horizontally", **kwargs):
-        """Join split halves of a target onto the display."""
-        return self.animate(target, "Split", f"join_in_{dir}", **kwargs)
+    def join_in(self, dir="horizontally", **kwargs):
+        """Join split halves of the managed message onto the display."""
+        return self.animate("Split", f"join_in_{dir}", **kwargs)
 
-    def split_out(self, target=None, dir="horizontally", **kwargs):
-        """Split a target off the display."""
-        return self.animate(target, "Split", f"split_out_{dir}", **kwargs)
+    def split_out(self, dir="horizontally", **kwargs):
+        """Split the managed message off the display."""
+        return self.animate("Split", f"split_out_{dir}", **kwargs)
 
-    def show(self, target=None, **kwargs):
-        """Show a target at the current position."""
-        return self.animate(target, "Static", "show", **kwargs)
+    def show(self, **kwargs):
+        """Show the managed message at the current position."""
+        return self.animate("Static", "show", **kwargs)
 
-    def hide(self, target=None, **kwargs):
-        """Hide the current target."""
-        return self.animate(target, "Static", "hide", **kwargs)
+    def hide(self, **kwargs):
+        """Hide the managed message."""
+        return self.animate("Static", "hide", **kwargs)
 
-    def blink(self, target=None, count=3, duration=1, **kwargs):
-        """Blink a target on and off."""
-        return self.animate(target, "Static", "blink", count=count, duration=duration, **kwargs)
+    def blink(self, count=3, duration=1, **kwargs):
+        """Blink the managed message on and off."""
+        return self.animate("Static", "blink", count=count, duration=duration, **kwargs)
 
-    def flash(self, target=None, count=3, duration=1, **kwargs):
-        """Fade a target in and out."""
-        return self.animate(target, "Static", "flash", count=count, duration=duration, **kwargs)
+    def flash(self, count=3, duration=1, **kwargs):
+        """Fade the managed message in and out."""
+        return self.animate("Static", "flash", count=count, duration=duration, **kwargs)
 
-    def fade_in(self, target=None, duration=1, steps=50, **kwargs):
-        """Fade a target in."""
-        return self.animate(target, "Fade", "in_", duration=duration, steps=steps, **kwargs)
+    def fade_in(self, duration=1, steps=50, **kwargs):
+        """Fade the managed message in."""
+        return self.animate("Fade", "in_", duration=duration, steps=steps, **kwargs)
 
-    def fade_out(self, target=None, duration=1, steps=50, **kwargs):
-        """Fade a target out."""
-        return self.animate(target, "Fade", "out", duration=duration, steps=steps, **kwargs)
+    def fade_out(self, duration=1, steps=50, **kwargs):
+        """Fade the managed message out."""
+        return self.animate("Fade", "out", duration=duration, steps=steps, **kwargs)
 
     @staticmethod
     def _wait(start_time, duration):

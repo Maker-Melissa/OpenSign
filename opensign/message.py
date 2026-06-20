@@ -47,7 +47,7 @@ class Message:
         self._shadow_offset = 0
         self._opacity = 1.0
         if font_file is not None:
-            font = self._load_font(font_file, font_size)
+            font = self.load_font(font_file, font_size)
         self.font = font
         self.color = color
         self.opacity = opacity
@@ -62,13 +62,14 @@ class Message:
 
     def add_font(self, name, file, size=None, use=False):
         """Add a font to this message's local font pool."""
-        self._fonts[name] = self._load_font(file, size)
+        self._fonts[name] = self.load_font(file, size)
         if use or self._current_font is None:
             self._current_font = self._fonts[name]
         return self._fonts[name]
 
     @staticmethod
-    def _load_font(file, size=None):
+    def load_font(file, size=None):
+        """Load a font from a file."""
         if size is not None:
             return ImageFont.truetype(file, size)
         return ImageFont.load(file)

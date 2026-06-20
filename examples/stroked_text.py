@@ -5,11 +5,12 @@
 
 import time
 
-from opensign import Message, OpenSign
+from opensign import OpenSign
 
 
 def main():
-    message = Message(
+    sign = OpenSign(chain=6)
+    sign.add_text(
         "Hello World!",
         font_file="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         font_size=14,
@@ -17,9 +18,8 @@ def main():
         stroke=(1, (255, 255, 255)),
     )
 
-    sign = OpenSign(chain=6)
     while True:
-        sign.scroll_in(message, dir_from="left")
+        sign.scroll_in(dir_from="left")
         time.sleep(1)
         sign.scroll_out(dir_to="right")
         time.sleep(1)

@@ -18,38 +18,46 @@ A library to facilitate easy RGB Matrix Sign Animations.
 Simple v2 API
 =============
 
-PyOpenSign 2.0 centers around ``Message`` objects and a single animation
-dispatcher. You can still build reusable messages manually:
+PyOpenSign 2.0 centers around a sign-managed ``Message`` and a single animation
+dispatcher. Message contents stay in place until you explicitly alter them with
+``clear()``, ``add_text()``, or ``add_image()``. When contents change, the
+message is automatically readjusted on the sign:
 
 .. code-block:: python
 
-    from opensign import Message, OpenSign
+    from opensign import OpenSign
 
     sign = OpenSign(chain=6)
     sign.add_font("dejavu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
 
-    message = Message(
+    sign.add_text(
         "Hello World!",
-        font=sign.fonts.get("dejavu"),
+        font="dejavu",
         color="crimson",
-        opacity=0.8,
     )
+    sign.scroll_in(dir_from="right")
+    sign.wipe_out(dir_to="left")
 
-    sign.animate(message, "Scroll", "in_from_left", duration=2)
+    sign.clear()
+    sign.add_text("Hello again", font="dejavu")
+    sign.fade_in()
+    sign.fade_out()
 
-For quick scripts, pass text directly and let PyOpenSign create the temporary
-message:
+When Python code needs direct control over message content, edit
+``sign.message`` and then animate without passing text:
 
 .. code-block:: python
 
-    sign.scroll_in("Hello World!", dir_from="right", color="#ffcc00", font="dejavu")
-    sign.wipe_out(dir_to="left")
-    sign.fade_in("Hello again", font="dejavu")
-    sign.fade_out()
+    from opensign import OpenSign
+
+    sign = OpenSign(chain=6)
+    sign.add_text("Hello ", color="#ffcc00")
+    sign.add_text("World!", color="lime")
+    sign.animate("Scroll", "in_from_left", duration=2)
 
 Animation plugins live in ``opensign/animations``. Each plugin is discovered
 from its module name, so adding ``opensign/animations/wipe.py`` with a ``Wipe``
-class makes ``sign.animate(message, "Wipe", "method_name")`` available without
+class makes ``sign.animate("Wipe", "method_name")`` available without
 editing a central animation dictionary.
 
 Dependencies
