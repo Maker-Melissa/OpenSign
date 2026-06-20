@@ -233,9 +233,7 @@ class OpenSign:
     def _background_image(self):
         """Return a full-size RGBA background image."""
         if isinstance(self._background, tuple):
-            return Image.new(
-                "RGBA", (self._matrix.width, self._matrix.height), self._background
-            )
+            return Image.new("RGBA", (self._matrix.width, self._matrix.height), self._background)
 
         combined_image = Image.new("RGBA", (self._matrix.width, self._matrix.height))
         combined_image.alpha_composite(self._background)
@@ -456,7 +454,7 @@ def _make_convenience_method(spec):
 
         def convenience(self, canvas=None, **kwargs):
             direction = kwargs.pop(spec["kwarg"], spec["default"])
-            method_name = f'{spec["prefix"]}{direction}'
+            method_name = f"{spec['prefix']}{direction}"
             return self.animate(spec["class_name"], method_name, canvas=canvas, **kwargs)
 
     elif spec["kind"] == "choice":
@@ -476,9 +474,7 @@ def _make_convenience_method(spec):
             return self.animate(spec["class_name"], spec["method_name"], canvas=canvas, **kwargs)
 
     convenience.__name__ = spec["name"]
-    convenience.__doc__ = (
-        f"Convenience wrapper for {spec['class_name']} animation plugin."
-    )
+    convenience.__doc__ = f"Convenience wrapper for {spec['class_name']} animation plugin."
     return convenience
 
 
